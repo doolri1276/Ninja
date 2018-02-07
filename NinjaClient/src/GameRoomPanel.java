@@ -173,9 +173,11 @@ public class GameRoomPanel extends JPanel{
 						pickedRoom=checkPicked();
 						if(pickedRoom!=null) {
 							pickedRoom.meExist=true;
+							me.room=pickedRoom;
 							myTurn=tmpTurn;
 							roomspickable=false;
 							myTimerRunning=false;
+							
 							dos.writeUTF("GAME:FIRSTPICK:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos());
 							dos.flush();
 							
@@ -338,20 +340,27 @@ public class GameRoomPanel extends JPanel{
 	}
 	
 	public void itemCheck() {
+		System.out.println("아이템 체크하러 들어옴");
+		
 		if(me.room.itemExist) {
+			System.out.println("아이템 있다.");
+			
 			Item i=me.room.getItem();
 			if(i instanceof AttackItem) {
 				if(myAttackItems.size()==3) return;
 				myAttackItems.add((AttackItem)i);
 				me.room.setItem(null);
 				me.room.setItemExist(false);
+				System.out.println("attack하나 먹었다.");
 			}else {
 				if(myPassiveItems.size()==3) return;
 				myPassiveItems.add((PassiveItem)i);
 				me.room.setItem(null);
 				me.room.setItemExist(false);
+				System.out.println("passive하나 먹었다.");
 			}
 		}
+		System.out.println("지나감.");
 	}
 	
 	public void doMyAction(){
@@ -373,7 +382,9 @@ public class GameRoomPanel extends JPanel{
 //		boolean myTimerRunning;
 		
 		System.out.println("내 액션 수행");
+		
 		itemCheck();
+		
 		attackable=true;
 		movable=true;
 		myTimerRunning=true;
@@ -407,6 +418,7 @@ public class GameRoomPanel extends JPanel{
 						
 						number=num[i/2];//그림 바꾸고
 						//상대에게 내 시간을 보내주고.
+						System.out.println("그림 바꿨다."+i/2);
 					}
 					
 					
