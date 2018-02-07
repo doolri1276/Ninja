@@ -102,7 +102,7 @@ public class Main_Client extends JFrame {
 		
 		//네트워크 연결
 		try {
-			mySocket=new Socket("192.168.0.211",12345);
+			mySocket=new Socket("127.0.0.1",12345);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
