@@ -418,55 +418,7 @@ public class Main_Server extends JFrame {
 			public void caseGame() {
 				if(msg[1].equals("READY")) {
 					
-					if(msg[2].equals("TRUE")) {
-						
-						me.isReady=true;
-						
-						sendOpoMsg("GAME:READY:TRUE:"+me.id);
-						
-						if(room.setReady()) {
-							
-							try {
-								
-								int rnd=new Random().nextInt(2);
-								if(rnd==0) {
-									me.playedTimesPlus();
-									me.opponent.playedTimesPlus();
-									room.isPlaying=true;
-									dos.writeUTF("GAME:START:FIRST");
-									dos.flush();
-									sendOpoMsg("GAME:START:LAST");
-								}else {
-									dos.writeUTF("GAME:START:LAST");
-									dos.flush();
-									sendOpoMsg("GAME:START:FIRST");
-								}
-								
-								
-								
-								
-								
-								
-								
-								
-								
-								
-								
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-							
-						}
-					}else {
-						try {
-							me.getOpponent().getDos().writeUTF("GAME:READY:FALSE:"+me.id);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+					caseGameReady();
 					
 				}else if(msg[1].equals("REQUEST")) {
 					if(msg[2].equals("ITEM")) {
@@ -491,15 +443,66 @@ public class Main_Server extends JFrame {
 					}
 				}else if(msg[1].equals("FIRSTPICK")) {
 					
-					me.itemReady=true;
-					me.setXY(msg[2], msg[3]);
-					if(me.opponent.getItemReady()) {
-						me.itemReady=false;
-						me.getOpponent().setItemReady(false);
-						sendOpoMsg(msg[0]+":"+msg[1]+":"+me.getX()+":"+me.getY());
-						sendMsg(msg[0]+":"+msg[1]+":"+me.getOpponent().getX()+":"+me.getOpponent().getY());
+					caseGameFirstPick(msg[2],msg[3]);	
+					
+				}else if(msg[1].equals("OPTIMER")) {
+					sendOpoMsg("GAME:OPTIMER:"+msg[2]);
+				}
+			}
+			
+			synchronized public void caseGameReady() {
+				if(msg[2].equals("TRUE")) {
+					
+					
+					me.isReady=true;
+					
+					sendOpoMsg("GAME:READY:TRUE:"+me.id);
+					
+					if(room.setReady()) {
+						
+						try {
+							
+							int rnd=new Random().nextInt(2);
+							if(rnd==0) {
+								me.playedTimesPlus();
+								me.opponent.playedTimesPlus();
+								room.isPlaying=true;
+								dos.writeUTF("GAME:START:FIRST");
+								dos.flush();
+								sendOpoMsg("GAME:START:LAST");
+							}else {
+								dos.writeUTF("GAME:START:LAST");
+								dos.flush();
+								sendOpoMsg("GAME:START:FIRST");
+							}
+							
+							
+							
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						
 					}
+				}else {
+					try {
+						me.getOpponent().getDos().writeUTF("GAME:READY:FALSE:"+me.id);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			synchronized public void caseGameFirstPick(String x,String y) {
+				me.itemReady=true;
+				me.setXY(x, y);
+				if(me.opponent.getItemReady()) {
+					me.itemReady=false;
+					me.getOpponent().setItemReady(false);
+					sendOpoMsg("GAME:FIRSTPICK:"+me.getX()+":"+me.getY());
+					sendMsg("GAME:FIRSTPICK:"+me.getOpponent().getX()+":"+me.getOpponent().getY());
 					
 				}
 			}

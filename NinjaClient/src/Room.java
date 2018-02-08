@@ -17,7 +17,7 @@ public class Room {
 		return item;
 	}
 	
-	public Room(int x,int y,int xx,int yy) {
+	public Room(int y,int x,int xx,int yy) {
 		Xpos=x;
 		Ypos=y;
 		

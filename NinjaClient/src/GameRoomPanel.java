@@ -177,8 +177,9 @@ public class GameRoomPanel extends JPanel{
 							myTurn=tmpTurn;
 							roomspickable=false;
 							myTimerRunning=false;
-							
-							dos.writeUTF("GAME:FIRSTPICK:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos());
+							myRoomX=pickedRoom.getXpos();
+							myRoomY=pickedRoom.getYpos();
+							dos.writeUTF("GAME:FIRSTPICK:"+myRoomX+":"+myRoomY);
 							dos.flush();
 							
 							return;
@@ -241,8 +242,8 @@ public class GameRoomPanel extends JPanel{
 	public void setOpoLocation(int x,int y) {
 		for(int i=0;i<5;i++)
 			for(int j=0;j<5;j++)
-				rooms[i][j].opExist=false;
-		rooms[x][y].opExist=true;
+				rooms[j][i].opExist=false;
+		rooms[y][x].opExist=true;
 	}
 	
 	public void doMyTurn() {
@@ -365,22 +366,7 @@ public class GameRoomPanel extends JPanel{
 	
 	public void doMyAction(){
 		
-//		boolean myTurn;
-//		boolean attackable;
-//		boolean movable;
-//		boolean attackClicking;
-//		boolean moveClicking;
-//		boolean itemDropTime;
-//		boolean isAlive;
-//		boolean startImgshow;
-//		boolean roomspickable;
-//		boolean secondItem;
-//		
-//		
-//		boolean isRunning;
-//		boolean opTimerRunning;
-//		boolean myTimerRunning;
-		
+
 		System.out.println("내 액션 수행");
 		
 		itemCheck();
@@ -389,8 +375,7 @@ public class GameRoomPanel extends JPanel{
 		movable=true;
 		myTimerRunning=true;
 		
-		
-		
+		System.out.println("시간 시작된다.");
 		TimerThread t=new TimerThread();
 		t.start();
 				
@@ -405,12 +390,13 @@ public class GameRoomPanel extends JPanel{
 	}
 	
 	
+	
 	class TimerThread extends Thread{
 		boolean isRun;
 		@Override
 		public void run() {
 			try {
-				
+				isRun=true;
 				for(int i=19;i>-1;i--) {
 					
 					
@@ -419,9 +405,13 @@ public class GameRoomPanel extends JPanel{
 						number=num[i/2];//그림 바꾸고
 						//상대에게 내 시간을 보내주고.
 						System.out.println("그림 바꿨다."+i/2);
+						dos.writeUTF("GAME:OPTIMER:"+i/2);
+						dos.flush();
 					}
 					
-					
+					if(!isRun) {
+						break;
+					}
 					Thread.sleep(500);
 				}
 				
@@ -431,6 +421,44 @@ public class GameRoomPanel extends JPanel{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void checkMovablePlaces() {
+		int movableArea=1;
+		int x=myRoomX; int y=myRoomY;
+		System.out.println("내 룸위치 : "+myRoomX+"과 "+myRoomY);
+		if(x-movableArea>-1) {
+			rooms[y][x-movableArea].pickable=true;
+			System.out.println("배열로 따지면 위치["+y+"]["+(x-movableArea)+"] 이 배열의 xpos,ypos"+rooms[y][x-movableArea].Xpos+"  "+rooms[y][x-movableArea].Ypos );
+			if(y-movableArea>-1)rooms[y-movableArea][x-movableArea].pickable=true;
+			if(y+movableArea<5)rooms[y+movableArea][x-movableArea].pickable=true;
+			System.out.println("여기 바뀐거 맞나?"+rooms[y+movableArea][x-movableArea].Xpos+"  "+rooms[y-movableArea][x-movableArea].Ypos+"위치.."+rooms[y-movableArea][x-movableArea].pickable);
+			
+		}
+		if(y-movableArea>-1)rooms[y-movableArea][x].pickable=true;
+		if(y+movableArea<5)rooms[y+movableArea][x].pickable=true;
+		System.out.println("정아래 pickable? "+rooms[y+movableArea][x-movableArea].pickable);
+		if(x+movableArea<5) {
+			System.out.println("무바블무바블 "+x+"    "+movableArea);
+			rooms[y][x+movableArea].pickable=true;
+			System.out.println("가운뎃 집 : "+(x+movableArea)+","+y+" : "+rooms[y][x+movableArea].pickable);
+			if(y-movableArea>-1)rooms[y-movableArea][x+movableArea].pickable=true;
+			System.out.println("윗집 : "+(x+movableArea)+","+(y-movableArea)+" : "+rooms[y-movableArea][x+movableArea].pickable);
+			if(y+movableArea<5)rooms[y+movableArea][x+movableArea].pickable=true;
+			System.out.println("아랫집 : "+(x+movableArea)+","+(y+movableArea)+" : "+rooms[y+movableArea][x+movableArea].pickable);
+		}
+		
+		for(int i=0;i<5;i++) {
+			for(int j=0;j<5;j++) {
+				System.out.print(rooms[i][j].pickable+"   ");
+			}
+			System.out.println();
+				
+		}
+		
+		
+		
+		
 	}
 	
 //	new Thread() {
@@ -518,14 +546,16 @@ public class GameRoomPanel extends JPanel{
 		attackable=true;
 		movable=true;
 		
-		rooms=new Room[5][];
+		rooms=new Room[5][5];
 		
 		int xxx=114,yyy=135;
+		
 		for(int i=0;i<5;i++) {
 			rooms[i]=new Room[5];
 			xxx=114;
 			for(int j=0;j<5;j++) {
 				rooms[i][j]=new Room(i,j,xxx,yyy);
+				System.out.println("새로운 방을 넣었다. y="+i+", x="+j);
 				xxx+=70;
 			}
 			yyy+=70;
@@ -835,7 +865,7 @@ public class GameRoomPanel extends JPanel{
 				
 				//System.out.println("room"+i+" "+j+" : " +(doorX-32)+","+(doorY-32)+"에 그림");
 				
-				
+				//System.out.println(room.pickable);
 				if(room.pickable) {
 					g.setColor(Color.CYAN);
 					g.fillRect(room.getX()-1, room.getY(), 66, 4);

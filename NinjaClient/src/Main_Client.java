@@ -146,7 +146,7 @@ public class Main_Client extends JFrame {
 				mX=e.getX()-10;
 				mY=e.getY()-30;
 				
-				
+				if(gameRoomPanel==null)return;
 				if(gameRoomPanel.myTurn) {
 					System.out.println("마이턴ok라 눌림");
 					
@@ -160,6 +160,11 @@ public class Main_Client extends JFrame {
 								if(room.pickable&&room.checkLocation(mX, mY)) {
 									//그러면 눌린다. 눌리는 작요ㅇ
 									System.out.println("눌렸다. "+mX+"    "+mY+"   "+room.getX()+"  "+room.getY());
+									for(int k=0;i<5;i++) {
+										for(int a=0;a<5;a++)
+											if (gameRoomPanel.getRooms()[a][k]!=room&&gameRoomPanel.getRooms()[k][a].isPicked)
+												gameRoomPanel.getRooms()[a][k].isPicked=false;
+									}
 									gameRoomPanel.disPickableAll();
 									room.isPicked=true;
 									return;
@@ -169,7 +174,7 @@ public class Main_Client extends JFrame {
 						
 							
 						}
-					}else if(gameRoomPanel.attackable) {
+					}else if(gameRoomPanel.attackable||gameRoomPanel.movable) {
 						System.out.println("attackable들어왔다.");
 						if(mX>17&&mX<114&&mY>510&&mY<545) {
 							if(gameRoomPanel.attackClicking) {
@@ -192,7 +197,6 @@ public class Main_Client extends JFrame {
 							}
 						}
 						
-					}else if(gameRoomPanel.movable) {
 						System.out.println("movable들어왔다.");
 						if(mX>129&&mX<226&&mY>510&&mY<545) {
 							if(gameRoomPanel.moveClicking) {
@@ -207,7 +211,7 @@ public class Main_Client extends JFrame {
 								gameRoomPanel.moveClicking=true;
 								gameRoomPanel.attackable=false;
 								gameRoomPanel.roomspickable=true;
-								//gameRoomPanel.pickMovablePlaces();
+								gameRoomPanel.checkMovablePlaces();
 							}
 						}
 						
@@ -466,6 +470,15 @@ public class Main_Client extends JFrame {
 				gameRoomPanel.setOpoLocation(ox,oy);
 				if(gameRoomPanel.myTurn)
 					gameRoomPanel.doMyTurn();
+			}else if(msg[1].equals("OPTIMER")) {
+				if(msg[2].equals("9")) {
+					gameRoomPanel.opTimerRunning=true;
+				}
+				int n=Integer.parseInt(msg[2]);
+				gameRoomPanel.number=gameRoomPanel.num[n];
+				if(n==0) {
+					gameRoomPanel.opTimerRunning=false;
+				}
 			}
 		}
 		
