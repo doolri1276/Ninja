@@ -95,6 +95,7 @@ public class GameRoomPanel extends JPanel{
 	Image item;
 	Image itemopa;
 	Image dropItem;
+	Image sign;
 	
 	
 	
@@ -120,10 +121,16 @@ public class GameRoomPanel extends JPanel{
 	boolean attacked;
 	boolean moved;
 	
+	boolean gameOverShow;
+	
 	
 	boolean isRunning;
 	boolean opTimerRunning;
 	boolean myTimerRunning;
+	
+	boolean gameOver;
+	
+	int attackPower;
 	
 	
 	
@@ -177,6 +184,7 @@ public class GameRoomPanel extends JPanel{
 							myTurn=tmpTurn;
 							roomspickable=false;
 							myTimerRunning=false;
+							disPickableAll();
 							myRoomX=pickedRoom.getXpos();
 							myRoomY=pickedRoom.getYpos();
 							dos.writeUTF("GAME:FIRSTPICK:"+myRoomX+":"+myRoomY);
@@ -223,6 +231,16 @@ public class GameRoomPanel extends JPanel{
 		return null;
 	}
 	
+	public void disPickedAll() {
+		for(int i=0;i<5;i++) {
+			for(int j=0;j<5;j++) {
+				rooms[i][j].isPicked=false;
+				
+			}
+		}
+	}
+	
+	
 	public void pickableAll() {
 		for(int i=0;i<5;i++) {
 			for(int j=0;j<5;j++) {
@@ -235,6 +253,7 @@ public class GameRoomPanel extends JPanel{
 		for(int i=0;i<5;i++) {
 			for(int j=0;j<5;j++) {
 				rooms[i][j].pickable=false;
+				
 			}
 		}
 	}
@@ -248,6 +267,9 @@ public class GameRoomPanel extends JPanel{
 	
 	public void doMyTurn() {
 		secondItem=true;
+		myTurn=true;
+		moveClicking=false;
+		attackClicking=false;
 		
 		requestItem();
 		
@@ -281,17 +303,7 @@ public class GameRoomPanel extends JPanel{
 		startImgshow=false;
 	}
 	
-	public void requestTimer() {
-		try {
-			dos.writeUTF("GAME:REQUEST:TIMER");
-			dos.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	
+
 	
 	void requestItem() {
 		try {
@@ -327,13 +339,16 @@ public class GameRoomPanel extends JPanel{
 				secondItem=false;
 				requestItem();
 			}else {
-				String msg="GAME:REQUEST:TIMER:ACTION1";
+				
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				attackable=true;
+				movable=true;
+				roomspickable=false;
 				doMyAction();
 			}
 		}
@@ -360,6 +375,12 @@ public class GameRoomPanel extends JPanel{
 				me.room.setItemExist(false);
 				System.out.println("passive하나 먹었다.");
 			}
+			try {
+				dos.writeUTF("GAME:ITEM:FOUND:"+me.room.getXpos()+":"+me.room.getYpos());
+				dos.flush();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 		System.out.println("지나감.");
 	}
@@ -371,10 +392,10 @@ public class GameRoomPanel extends JPanel{
 		
 		itemCheck();
 		
-		attackable=true;
-		movable=true;
-		myTimerRunning=true;
 		
+		myTimerRunning=true;
+		//disPickedAll();
+		roomspickable=false;
 		System.out.println("시간 시작된다.");
 		TimerThread t=new TimerThread();
 		t.start();
@@ -392,12 +413,99 @@ public class GameRoomPanel extends JPanel{
 	
 	
 	class TimerThread extends Thread{
-		boolean isRun;
+			Room pickedRoom;
 		@Override
 		public void run() {
 			try {
-				isRun=true;
+				
+			
+				
 				for(int i=19;i>-1;i--) {
+					
+					pickedRoom=checkPicked();
+					if(pickedRoom!=null) {
+						
+						if(movable) {
+							
+							me.room.meExist=false;
+							me.room=pickedRoom;
+							pickedRoom.meExist=true;
+							roomspickable=false;
+							myRoomX=me.room.getXpos();
+							myRoomY=me.room.getYpos();
+							moveClicking=false;
+							movable=false;
+							moved=true;
+							myTimerRunning=false;
+							
+							if(attacked) {
+								dos.writeUTF("GAME:MOVE:"+myRoomX+":"+myRoomY+":DONE");
+								dos.flush();
+								myTurn=false;
+								moved=false;
+								attacked=false;
+								break;
+							}else {
+								dos.writeUTF("GAME:MOVE:"+myRoomX+":"+myRoomY+":STILL");
+								dos.flush();
+								attackable=true;
+								doMyAction();
+								break;
+							}
+						}if(attackable) {
+							pickedRoom.isOpened=true;
+							attacked=true;
+							attackable=false;
+							attackClicking=false;
+							myTimerRunning=false;
+							attackPower=30;
+							
+							if(pickedRoom.meExist)changeMyHp(-(int)(attackPower*0.7));
+							if(pickedRoom.opExist)changeOpHp(-attackPower);
+							if(opHp<=0) {
+								myTimerRunning=false;
+								opTimerRunning=false;
+								myTurn=false;
+								movable=false;
+								attackable=false;
+								moveClicking=false;
+								attackClicking=false;
+								roomspickable=false;
+								dos.writeUTF("GAME:OVER");
+								dos.flush();
+							}
+							
+							
+							if(moved) {
+								dos.writeUTF("GAME:ATTACK:ONE:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos()+":"+attackPower+":DONE");
+								dos.flush();
+								myTurn=false;
+								moved=false;
+								attacked=false;
+								
+								if(opHp<=0) {
+									dos.writeUTF("GAME:OVER");
+									dos.flush();
+								}
+								
+								
+								
+							}else {
+								dos.writeUTF("GAME:ATTACK:ONE:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos()+":"+attackPower+":STILL");
+								dos.flush();
+								movable=true;
+								doMyAction();
+								if(opHp<=0) {
+									dos.writeUTF("GAME:OVER");
+									dos.flush();
+								}
+								
+							}
+								
+						}
+						
+						
+					}
 					
 					
 					if(i%2==0) {
@@ -409,7 +517,7 @@ public class GameRoomPanel extends JPanel{
 						dos.flush();
 					}
 					
-					if(!isRun) {
+					if(!myTimerRunning) {
 						break;
 					}
 					Thread.sleep(500);
@@ -423,83 +531,113 @@ public class GameRoomPanel extends JPanel{
 		}
 	}
 	
+	public void gameOvered(String winlost) {
+		opTimerRunning=false;
+		myTimerRunning=false;
+		myTurn=false;
+		if(winlost.equals("LOST"))myHp=0;
+		else opHp=0;
+		sign=Toolkit.getDefaultToolkit().getImage("images/"+winlost+".png");
+		gameOverShow=true;
+		
+
+		try {
+			System.out.println("잠이든다..");
+			Thread.sleep(5000);
+			System.out.println("잠이 깼다!");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		resetGame();
+		gameOverShow=false;
+		
+		
+	}
+	
+	public void resetGame() {
+		myHp=100;
+		opHp=100;
+	}
+	
+	public void skippedMoving() {
+		try {
+			myTimerRunning=false;
+			
+			if(attacked) {
+				myTurn=false;
+				moved=false;
+				attacked=false;
+				dos.writeUTF("GAME:MOVE:SKIP:SKIP:DONE");
+				dos.flush();
+				
+			}else {
+				dos.writeUTF("GAME:MOVE:SKIP:SKIP:STILL");
+				attackable=true;
+				doMyAction();
+			}
+		
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void skippedAttacking() {
+		try {
+			myTimerRunning=false;
+			roomspickable=false;
+			attackClicking=false;
+			if(moved) {
+				myTurn=false;
+				moved=false;
+				attacked=false;
+				dos.writeUTF("GAME:ATTACK:SKIP:SKIP:DONE");
+				dos.flush();
+			}else {
+				movable=true;
+				attacked=true;
+				dos.writeUTF("GAME:ATTACK:SKIP:SKIP:STILL");
+				dos.flush();
+				
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void checkMovablePlaces() {
 		int movableArea=1;
 		int x=myRoomX; int y=myRoomY;
 		System.out.println("내 룸위치 : "+myRoomX+"과 "+myRoomY);
 		if(x-movableArea>-1) {
 			rooms[y][x-movableArea].pickable=true;
-			System.out.println("배열로 따지면 위치["+y+"]["+(x-movableArea)+"] 이 배열의 xpos,ypos"+rooms[y][x-movableArea].Xpos+"  "+rooms[y][x-movableArea].Ypos );
+			//System.out.println("배열로 따지면 위치["+y+"]["+(x-movableArea)+"] 이 배열의 xpos,ypos"+rooms[y][x-movableArea].Xpos+"  "+rooms[y][x-movableArea].Ypos );
 			if(y-movableArea>-1)rooms[y-movableArea][x-movableArea].pickable=true;
 			if(y+movableArea<5)rooms[y+movableArea][x-movableArea].pickable=true;
-			System.out.println("여기 바뀐거 맞나?"+rooms[y+movableArea][x-movableArea].Xpos+"  "+rooms[y-movableArea][x-movableArea].Ypos+"위치.."+rooms[y-movableArea][x-movableArea].pickable);
+			//System.out.println("여기 바뀐거 맞나?"+rooms[y+movableArea][x-movableArea].Xpos+"  "+rooms[y-movableArea][x-movableArea].Ypos+"위치.."+rooms[y-movableArea][x-movableArea].pickable);
 			
 		}
 		if(y-movableArea>-1)rooms[y-movableArea][x].pickable=true;
 		if(y+movableArea<5)rooms[y+movableArea][x].pickable=true;
-		System.out.println("정아래 pickable? "+rooms[y+movableArea][x-movableArea].pickable);
+		//System.out.println("정아래 pickable? "+rooms[y+movableArea][x-movableArea].pickable);
 		if(x+movableArea<5) {
-			System.out.println("무바블무바블 "+x+"    "+movableArea);
+			
 			rooms[y][x+movableArea].pickable=true;
-			System.out.println("가운뎃 집 : "+(x+movableArea)+","+y+" : "+rooms[y][x+movableArea].pickable);
+			
 			if(y-movableArea>-1)rooms[y-movableArea][x+movableArea].pickable=true;
-			System.out.println("윗집 : "+(x+movableArea)+","+(y-movableArea)+" : "+rooms[y-movableArea][x+movableArea].pickable);
+			
 			if(y+movableArea<5)rooms[y+movableArea][x+movableArea].pickable=true;
-			System.out.println("아랫집 : "+(x+movableArea)+","+(y+movableArea)+" : "+rooms[y+movableArea][x+movableArea].pickable);
+			
 		}
 		
-		for(int i=0;i<5;i++) {
-			for(int j=0;j<5;j++) {
-				System.out.print(rooms[i][j].pickable+"   ");
-			}
-			System.out.println();
-				
-		}
 		
 		
 		
 		
 	}
 	
-//	new Thread() {
-//		@Override
-//		public void run() {
-//			try {
-//				Room pickedRoom;
-//				for(int i=19;i>-1;i--) {
-//					pickedRoom=checkPicked();
-//					if(pickedRoom!=null) {
-//						pickedRoom.meExist=true;
-//						myTurn=tmpTurn;
-//						roomspickable=false;
-//						myTimerRunning=false;
-//						dos.writeUTF("GAME:FIRSTPICK:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos());
-//						dos.flush();
-//						
-//						return;
-//					}//눌렸는지 체크
-//					
-//					number=num[i/2];
-//					//그림 바꾸고
-//					Thread.sleep(500);
-//					//한번 잠들고
-//				}
-//				
-//				disPickableAll();
-//				myTimerRunning=false;
-//				Random rnd = new Random();
-//				int x=rnd.nextInt(5);
-//				int y=rnd.nextInt(5);
-//				pickedRoom=rooms[x][y];
-//				pickedRoom.meExist=true;
-//				myTurn=tmpTurn;
-//				dos.writeUTF("GAME:FIRSTPICK:"+pickedRoom.getXpos()+":"+pickedRoom.getYpos());
-//				dos.flush();
-//			}catch(Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//	}.start();
+
 	
 	
 	
@@ -519,6 +657,19 @@ public class GameRoomPanel extends JPanel{
 		else if(dropX>width/2) {dropDX=5;dropDY=10;}
 		
 		
+		
+	}
+	
+	public void gotAttacked(int x,int y,int power) {
+		Room r=rooms[y][x];
+		r.isOpened=true;
+		if(r.meExist) {
+			changeMyHp(-power);
+		}
+		
+		if(r.opExist) {
+			changeOpHp(-(int)(power*0.7));
+		}
 		
 	}
 	
@@ -832,13 +983,13 @@ public class GameRoomPanel extends JPanel{
 				if(room.isOpened) {
 					g.drawImage(openedDoor, room.getX(), room.getY(), this);
 					
-					
-					
-					if(room.meExist) {
+					if(room.meExist&&room.opExist) {
+						g.drawImage(smallOp, room.getX()+30, room.getY(), this);
+						g.drawImage(smallMe, room.getX()+2, room.getY(), this);
+						
+					}else if(room.meExist) {
 						g.drawImage(smallMe, room.getX()+16, room.getY(), this);
-					}
-					
-					if(room.opExist) {
+					}else if(room.opExist) {
 						g.drawImage(smallOp, room.getX()+16, room.getY(), this);
 					}
 					
@@ -892,11 +1043,14 @@ public class GameRoomPanel extends JPanel{
 		g.fillRect(17, 474, 72, 8);
 		g.fillRect(484, 474, 72, 8);
 		
-		g.setColor(new Color(0x1B75BB));
-		g.fillRect(17, 474, opHp-28, 8);
-		
-		g.setColor(new Color(0xCE2027));
-		g.fillRect(484, 474, myHp-28, 8);
+		if((int)(opHp*72/100)>0) {
+			g.setColor(new Color(0x1B75BB));
+			g.fillRect(17, 474, (int)(opHp*72/100), 8);
+		}
+		if((int)(myHp*72/100)>0) {
+			g.setColor(new Color(0xCE2027));
+			g.fillRect(484, 474, (int)(myHp*72/100), 8);
+		}
 		
 		g.setColor(new Color(0x422C15));
 		g.fillRect(17, 510, 97, 35);
@@ -969,6 +1123,11 @@ public class GameRoomPanel extends JPanel{
 			g.drawImage(dropItem, dropX-32, dropY-32, this);
 		}
 		
+		if(gameOverShow) {
+			g.drawImage(sign, 60, 180, this);
+			
+		}
+		
 		
 	}
 	
@@ -993,6 +1152,9 @@ public class GameRoomPanel extends JPanel{
 					e.printStackTrace();
 				}
 			}
+			
+			
+			
 		}
 	}
 	

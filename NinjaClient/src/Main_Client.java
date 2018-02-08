@@ -159,60 +159,56 @@ public class Main_Client extends JFrame {
 								Room room=gameRoomPanel.getRooms()[i][j];
 								if(room.pickable&&room.checkLocation(mX, mY)) {
 									//그러면 눌린다. 눌리는 작요ㅇ
-									System.out.println("눌렸다. "+mX+"    "+mY+"   "+room.getX()+"  "+room.getY());
-									for(int k=0;i<5;i++) {
-										for(int a=0;a<5;a++)
-											if (gameRoomPanel.getRooms()[a][k]!=room&&gameRoomPanel.getRooms()[k][a].isPicked)
-												gameRoomPanel.getRooms()[a][k].isPicked=false;
-									}
+									System.out.println("눌렸다. "+mX+"    "+mY+"   "+room.getXpos()+"  "+room.getYpos());
+									
 									gameRoomPanel.disPickableAll();
 									room.isPicked=true;
 									return;
 								}
 								
 							}
-						
-							
 						}
+						if(mX>17&&mX<114&&mY>510&&mY<545&&gameRoomPanel.attackClicking) {
+							System.out.println("attack skip 눌렸다!");
+							gameRoomPanel.attackable=false;
+							gameRoomPanel.attackClicking=false;
+							gameRoomPanel.attacked=true;
+							gameRoomPanel.disPickableAll();
+							gameRoomPanel.roomspickable=false;
+							gameRoomPanel.myTimerRunning=false;
+							gameRoomPanel.skippedAttacking();
+							//아무것도 안했다고 보내야함.
+							return;
+						}else if(gameRoomPanel.moveClicking&&mX>129&&mX<226&&mY>510&&mY<545) {//움직였던 경우.
+							gameRoomPanel.movable=false;
+							gameRoomPanel.moveClicking=false;
+							gameRoomPanel.moved=true;
+							gameRoomPanel.disPickableAll();
+							gameRoomPanel.roomspickable=false;
+							gameRoomPanel.myTimerRunning=false;
+							gameRoomPanel.skippedMoving();
+							return;
+						}
+						
 					}else if(gameRoomPanel.attackable||gameRoomPanel.movable) {
 						System.out.println("attackable들어왔다.");
-						if(mX>17&&mX<114&&mY>510&&mY<545) {
-							if(gameRoomPanel.attackClicking) {
-								System.out.println("attack skip 눌렸다!");
-								gameRoomPanel.attackable=false;
-								gameRoomPanel.attackClicking=false;
-								gameRoomPanel.attacked=true;
-								gameRoomPanel.disPickableAll();
-								gameRoomPanel.roomspickable=false;
-								gameRoomPanel.myTimerRunning=false;
-								
-								//아무것도 안했다고 보내야함.
-							}else {
+						if(gameRoomPanel.attackable&&mX>17&&mX<114&&mY>510&&mY<545) {
+							
 								System.out.println("attack눌렸다!");
 								gameRoomPanel.attackClicking=true;
 								gameRoomPanel.movable=false;
 								gameRoomPanel.roomspickable=true;
 								gameRoomPanel.pickableAll();
-								
-							}
-						}
+								return;
 						
-						System.out.println("movable들어왔다.");
-						if(mX>129&&mX<226&&mY>510&&mY<545) {
-							if(gameRoomPanel.moveClicking) {
-								gameRoomPanel.movable=false;
-								gameRoomPanel.moveClicking=false;
-								gameRoomPanel.moved=true;
-								gameRoomPanel.disPickableAll();
-								gameRoomPanel.roomspickable=false;
-								gameRoomPanel.myTimerRunning=false;
-							}else {
-								System.out.println("move 눌렸다!");
-								gameRoomPanel.moveClicking=true;
-								gameRoomPanel.attackable=false;
-								gameRoomPanel.roomspickable=true;
-								gameRoomPanel.checkMovablePlaces();
-							}
+						}else if(gameRoomPanel.movable&&mX>129&&mX<226&&mY>510&&mY<545) {
+							System.out.println("movable들어왔다.");
+							System.out.println("move 눌렸다!");
+							gameRoomPanel.moveClicking=true;
+							gameRoomPanel.attackable=false;
+							gameRoomPanel.roomspickable=true;
+							gameRoomPanel.checkMovablePlaces();
+							return;
 						}
 						
 						
@@ -447,6 +443,7 @@ public class Main_Client extends JFrame {
 			}else if(msg[1].equals("START")) {
 				
 				gameRoomPanel.getBtn_ready().setText("게임 진행중");
+				
 				gameRoomPanel.startShow();
 				
 			
@@ -459,11 +456,18 @@ public class Main_Client extends JFrame {
 				gameRoomPanel.pickMyPlace();
 				
 			}else if(msg[1].equals("ITEM")) {
-				int x=Integer.parseInt(msg[2]);
-				int y=Integer.parseInt(msg[3]);
-				int type=Integer.parseInt(msg[4]);
+				if(msg[2].equals("FOUND")) {
+					int x=Integer.parseInt(msg[3]);
+					int y=Integer.parseInt(msg[4]);
+					gameRoomPanel.getRooms()[y][x].setItem(null);
+					gameRoomPanel.getRooms()[y][x].setItemExist(false);
+				}else {
+					int x=Integer.parseInt(msg[2]);
+					int y=Integer.parseInt(msg[3]);
+					int type=Integer.parseInt(msg[4]);
+					gameRoomPanel.putItem(x,y,type);
+				}
 				
-				gameRoomPanel.putItem(x,y,type);
 			}else if(msg[1].equals("FIRSTPICK")) {
 				int ox=Integer.parseInt(msg[2]);
 				int oy=Integer.parseInt(msg[3]);
@@ -479,6 +483,44 @@ public class Main_Client extends JFrame {
 				if(n==0) {
 					gameRoomPanel.opTimerRunning=false;
 				}
+			}else if(msg[1].equals("MOVE")) {
+				gameRoomPanel.opTimerRunning=false;
+				if(msg[2].equals("SKIP")) {
+					if(msg[4].equals("DONE")) {
+						gameRoomPanel.myTurn=true;
+						gameRoomPanel.doMyTurn();
+					}
+				}else {
+					int x=Integer.parseInt(msg[2]);
+					int y=Integer.parseInt(msg[3]);
+					gameRoomPanel.setOpoLocation(x, y);
+					if(msg[4].equals("DONE")) {
+						gameRoomPanel.myTurn=true;
+						gameRoomPanel.doMyTurn();
+					}
+				}
+			}else if(msg[1].equals("ATTACK")) {
+				gameRoomPanel.opTimerRunning=false;
+				if(msg[2].equals("SKIP")) {
+					if(msg[4].equals("DONE")) {
+						gameRoomPanel.myTurn=true;
+						gameRoomPanel.doMyTurn();
+					}
+				}else if(msg[2].equals("ONE")) {
+					int x=Integer.parseInt(msg[3]);
+					int y=Integer.parseInt(msg[4]);
+					int power=Integer.parseInt(msg[5]);
+					System.out.println("공격받았음 x:"+msg[3]+" y:"+msg[4]+" pwoer:"+power);
+					gameRoomPanel.gotAttacked(x, y, power);
+					if(msg[6].equals("DONE")) {
+						gameRoomPanel.myTurn=true;
+						gameRoomPanel.doMyTurn();
+					}
+					
+				}
+			}else if(msg[1].equals("OVER")) {
+				
+				gameRoomPanel.gameOvered(msg[2]);
 			}
 		}
 		
@@ -623,8 +665,6 @@ public class Main_Client extends JFrame {
 				}else {
 					roomChat.append("[SERVER] "+msg[3]+"님께서 레디 취소하였습니다.\n");
 				}
-			}else if(msg[1].equals("START")) {
-				
 			}
 		}
 		

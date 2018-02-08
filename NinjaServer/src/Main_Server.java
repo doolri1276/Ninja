@@ -415,30 +415,26 @@ public class Main_Server extends JFrame {
 				
 			}
 			
-			public void caseGame() {
+			synchronized public void caseGame() {
 				if(msg[1].equals("READY")) {
 					
 					caseGameReady();
 					
 				}else if(msg[1].equals("REQUEST")) {
 					if(msg[2].equals("ITEM")) {
-						roomAppend(me.getCurrentLocation(), "아이템 리퀘스트하러왔다");
+						roomAppend(me.getCurrentLocation(), "[GAME] Item Request");
 						//String item=room.getRndItem();//GAME:ITEM:X위치:Y위치:아이템종류
 						String item=getRndItem();
-						roomAppend(me.getCurrentLocation(), "아이템 구함"+item);
+						roomAppend(me.getCurrentLocation(), "[GAME] "+item);
 						try {
 							dos.writeUTF(item);
-							roomAppend(me.getCurrentLocation(), "나에게 보냄");
 							dos.flush();
 							sendOpoMsg(item);
-							roomAppend(me.getCurrentLocation(), "아이템 보냄");
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						
-						
-					}else if(msg[2].equals("TIMER")) {
 						
 					}
 				}else if(msg[1].equals("FIRSTPICK")) {
@@ -447,6 +443,32 @@ public class Main_Server extends JFrame {
 					
 				}else if(msg[1].equals("OPTIMER")) {
 					sendOpoMsg("GAME:OPTIMER:"+msg[2]);
+				}else if(msg[1].equals("MOVE")) {
+					roomAppend(me.currentLocation, "[GAME] "+me.getID()+"위치 : ["+msg[2]+"] ["+msg[3]+"]");
+					sendOpoMsg("GAME:MOVE:"+msg[2]+":"+msg[3]+":"+msg[4]);
+				}else if(msg[1].equals("ATTACK")) {
+					if(msg[2].equals("SKIP")) {
+						sendOpoMsg("GAME:ATTACK:SKIP:SKIP:"+msg[4]);
+					}else if(msg[2].equals("ONE")){
+						sendOpoMsg("GAME:ATTACK:ONE:"+msg[3]+":"+msg[4]+":"+msg[5]+":"+msg[6]);
+					}else if(msg[2].equals("TWO")) {
+						sendOpoMsg("GAME:ATTACK:TWO:"+msg[3]+":"+msg[4]+":"+msg[5]+":"+msg[6]+":"+msg[7]+":"+msg[8]);
+					}
+					
+				}else if(msg[1].equals("ITEM")) {
+					if(msg[2].equals("FOUND")) {
+						sendOpoMsg("GAME:ITEM:FOUND:"+msg[3]+":"+msg[4]);
+					}
+				}else if(msg[1].equals("OVER")){
+					room.isPlaying=false;
+					try {
+						me.wonTimesPlus();
+						me.getOpponent().lostTimesPlus();
+						dos.writeUTF("GAME:OVER:WIN");
+						sendOpoMsg("GAME:OVER:LOST");
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			
@@ -455,11 +477,11 @@ public class Main_Server extends JFrame {
 					
 					
 					me.isReady=true;
-					
+					roomAppend(me.currentLocation, "[SERVER] "+me.getID()+"레디함");
 					sendOpoMsg("GAME:READY:TRUE:"+me.id);
 					
 					if(room.setReady()) {
-						
+						roomAppend(me.currentLocation, "[GAME] == 게임 시작 ==");
 						try {
 							
 							int rnd=new Random().nextInt(2);
@@ -467,10 +489,12 @@ public class Main_Server extends JFrame {
 								me.playedTimesPlus();
 								me.opponent.playedTimesPlus();
 								room.isPlaying=true;
+								roomAppend(me.currentLocation, "[GAME] 선공 : "+me.getID());
 								dos.writeUTF("GAME:START:FIRST");
 								dos.flush();
 								sendOpoMsg("GAME:START:LAST");
 							}else {
+								roomAppend(me.currentLocation, "[GAME] 선공 : "+me.getOpponent().getID());
 								dos.writeUTF("GAME:START:LAST");
 								dos.flush();
 								sendOpoMsg("GAME:START:FIRST");
@@ -486,6 +510,7 @@ public class Main_Server extends JFrame {
 						
 					}
 				}else {
+					roomAppend(me.currentLocation, "[SERVER] "+me.getID()+"레디취소");
 					try {
 						me.getOpponent().getDos().writeUTF("GAME:READY:FALSE:"+me.id);
 					} catch (IOException e) {
@@ -496,6 +521,7 @@ public class Main_Server extends JFrame {
 			}
 			
 			synchronized public void caseGameFirstPick(String x,String y) {
+				roomAppend(me.currentLocation, "[GAME] "+me.getID()+"위치 : ["+x+"] ["+y+"]");
 				me.itemReady=true;
 				me.setXY(x, y);
 				if(me.opponent.getItemReady()) {
