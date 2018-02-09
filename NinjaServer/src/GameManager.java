@@ -12,7 +12,7 @@ public class GameManager {
 		
 	}
 	
-	public boolean createCheck(int num) {
+	synchronized public boolean createCheck(int num) {
 		if(roomList.size()==4) {
 			return false;
 		}
@@ -23,14 +23,14 @@ public class GameManager {
 		return true;
 	}
 	
-	public String createRoom(User user,String msg,DataOutputStream dos) {
-		Room room=new Room(roomList.size()+1+"",user,msg,dos,this);
+	synchronized public void createRoom(User user,String msg,DataOutputStream dos,int roomNumber) {
+		Room room=new Room(roomNumber+"",user,msg,dos,this);
 		roomList.add(room);
-		return room.getRoomNum();//roomNum은 ROOM4형태
+		return;//roomNum은 ROOM4형태
 		
 	}
 	
-	public void removeRoom(Room room) {
+	synchronized public void removeRoom(Room room) {
 		roomList.remove(room);
 	}
 	
@@ -61,15 +61,29 @@ public class GameManager {
 		return msg;
 	}
 	
-	public String exitRoom(User user,String location) {
+	synchronized public String exitRoom(User user,String location) {
+		System.out.println("=============================exitRoom하러 들어왔다.");
 		String exit="";
 		for(int i=0;i<roomList.size();i++) {
-			if(("ROOM"+roomList.get(i).getRoomNum()).equals(location)) {
+			System.out.println(roomList.get(i).getRoomNum()+"와 "+location+"  ==========");
+			if((roomList.get(i).getRoomNum()).equals(location)) {
+				System.out.println("gm 같은 공간 확인완료!"+roomList.get(i).getRoomNum()+"    "+location);
+				
 				exit=roomList.get(i).exit(user);
+				
+				if(roomList.get(i).getPlayerList().size()<1) {
+					System.out.println("gm 아 사람이 너무 적음.. 없어짐!");
+					roomList.remove(i);
+					System.out.println("gm 방이 지워졌습니다. "+roomList.size());
+					
+					
+				}
 				
 				break;
 			}
 		}
+		
+		System.out.println("gm 그래서 결국 만들어진 문구 : "+exit);
 		return exit;
 		
 	}
@@ -96,6 +110,23 @@ public class GameManager {
 	
 	public ArrayList<Room> getRoomList() {
 		return roomList;
+	}
+	
+	public String getRoomMsg(int number) {
+		for(int i=0;i<roomList.size();i++) {
+			Room r=roomList.get(i);
+			if(r.getRoomNum().equals(number+"")) {
+				if(r.getPlayerList().size()==2) {
+					return "WAITING:ROOM"+number+":FULL:"+r.getPlayerList().get(0).getID()+":"+r.getPlayerList().get(1).getID()+":"+r.getRoomTitle();
+				}else {
+					return "WAITING:ROOM"+number+":CHANGED:"+r.getPlayerList().get(0).getID()+":---:"+r.getRoomTitle();
+				}
+				
+				
+			}
+		}
+		return "WAITING:ROOM"+number+":CHANGED:---:---";
+		
 	}
 	
 	

@@ -6,7 +6,7 @@ public class Room {
 	
 	String roomTitle;
 	ArrayList<User> playerList;
-	User roomOwner;
+	
 	
 	String roomNum;//숫자로 되어있다.1~4로..
 	String state;
@@ -35,7 +35,6 @@ public class Room {
 		playerList=new ArrayList<>();
 		playerList.add(user);
 		roomTitle=title;
-		roomOwner=user;
 		this.dos=dos;
 		this.gameManager=gameManager;
 		state="RWAITING";
@@ -45,34 +44,41 @@ public class Room {
 		
 	}
 	
-	public String exit(User user) {
-		user.opponent=null;
-		user.room=null;
-		roomOwner.opponent=null;
+	synchronized public String exit(User user) {
+		if(user.getOpponent()!=null) {
+			System.out.println("room opponent있어서 지웠다.");
+			user.getOpponent().setOpponent(null);
+			user.setOpponent(null);
+			System.out.println("room opponent다 지웠다.");
+		}
+		if(user.room!=null)user.room=null;
 		playerList.remove(user);
+		System.out.println("room playerlist에서 나 지워짐.");
+		System.out.println("room playerlist player갯수 : "+playerList.size());
 		user.setCurrentLocation("WAITING");
 		
 		if(playerList.size()<1) {
-			gameManager.removeRoom(this);
+			System.out.println("room 사람이 0명이라서지워야 함.");
 			return"WAITING:ROOM"+roomNum+":REMOVED";
+			
 		}else {
-			this.roomOwner=playerList.get(0);
-			return"WAITING:ROOM"+roomNum+":CHANGED:"+roomOwner.getID();
+			System.out.println("room 사람이 1명 있어서 변경된 정보 보냄.");
+			return"WAITING:ROOM"+roomNum+":CHANGED:"+playerList.get(0).getID();
 		}
 		
 	}
 	
-	public void enter(User user) {
+	synchronized public void enter(User user) {
 		playerList.add(user);
 		System.out.println("room playerlist추가완료 59라인");
-		user.setOpponent(roomOwner);
-		roomOwner.setOpponent(user);
+		user.setOpponent(playerList.get(0));
+		playerList.get(0).setOpponent(user);
 		state="READY";
 		System.out.println("room enter됨. 53라인");
 		user.setRoom(this);
 	}
 	
-	public boolean setReady() {
+	synchronized public boolean setReady() {
 		for(User u:playerList) {
 			if(!u.getIsReady()) {
 				return false;
@@ -112,14 +118,12 @@ public class Room {
 
 	public String getRoomTitle() {return roomTitle;}
 	public ArrayList<User> getPlayerList() {return playerList;}
-	public User getRoomOwner() {return roomOwner;}
 	public String getRoomNum() {return roomNum;}
 	public String getState() {return state;	}
 	
 	
 	public void setRoomTitle(String roomTitle) {this.roomTitle = roomTitle;}
 	public void setPlayerList(ArrayList<User> playerList) {	this.playerList = playerList;}
-	public void setRoomOwner(User roomOwner) {	this.roomOwner = roomOwner;}
 	public void setRoomNum(String roomNum) {	this.roomNum = roomNum;}
 
 	

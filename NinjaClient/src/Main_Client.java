@@ -528,7 +528,7 @@ public class Main_Client extends JFrame {
 			}
 		}
 		
-		public void caseLogin() {
+		synchronized public void caseLogin() {
 			
 			if(msg[1].equals("SUCCESS")) {
 				System.out.println("로그인페이지 SUCCESS확인됨");
@@ -672,7 +672,7 @@ public class Main_Client extends JFrame {
 			}
 		}
 		
-		public void caseRoom1234(int num) {
+		synchronized public void caseRoom1234(int num) {
 			if(msg[2].equals("CREATED")) {
 				System.out.println("created들어왔다.");
 				waitingPanel.setState(num, msg[4]);
@@ -684,13 +684,21 @@ public class Main_Client extends JFrame {
 				waitingPanel.setPlayer2(num, "---");
 				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
 			}else if(msg[2].equals("CHANGED")) {
+				System.out.println("바꾸러 들어왔습니다. ");
 				waitingPanel.setPlayer1(num, msg[3]);
 				waitingPanel.setPlayer2(num, "---");
 				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+				if(msg[5]!=null) {
+					waitingPanel.setState(num, msg[5]);
+					System.out.println("타이틀 변경");
+				}
 			}else if(msg[2].equals("FULL")) {
 				waitingPanel.setPlayer1(num, msg[3]);
 				waitingPanel.setPlayer2(num, msg[4]);
 				waitingPanel.setRoomb(num, "[만실] 입장불가");
+				if(msg[5]!=null) {
+					waitingPanel.setState(num, msg[5]);
+				}
 			}
 		}
 		
@@ -912,6 +920,27 @@ public class Main_Client extends JFrame {
 		revalidate();
 		repaint();
 		System.out.println("다시그렸습니다.");
+		try {
+			dos.writeUTF("WAITING:ONLINE");
+			dos.flush();
+			dos.writeUTF("WAITING:ROOMS");
+			dos.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		if(waitingPanel.getOnlineMembers().getText().length()==0) {
+			try {
+				dos.writeUTF("WAITING:ONLINE");
+				dos.flush();
+			}catch(Exception e) {
+				
+			}
+		}
+		
 	}
 	
 	void changeRoom(String num,String title) {
@@ -932,6 +961,8 @@ public class Main_Client extends JFrame {
 		repaint();
 		System.out.println("다시그렸습니다.");
 		roomChat=gameRoomPanel.getRoomChat();
+		
+		
 	}
 	
 	

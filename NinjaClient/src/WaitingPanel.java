@@ -66,14 +66,15 @@ public class WaitingPanel extends JPanel{
 	public JLabel[] getPlayer2() {return player2;}
 	public JFrame getJ() {	return j;}
 	
+	
 	public void setState(int num,String s) {
 		System.out.println("setState에 들어왔다.");
-		System.out.println(state[num]);
 		System.out.println(state[num].getText());
 		state[num].setText(s);}
 	public void setPlayer1(int num,String s) {player1[num].setText(s);}
 	public void setPlayer2(int num,String s) {player2[num].setText(s);}
 	public void setRoomb(int num,String s) {roomb[num].setText(s);}
+	
 	
 	public WaitingPanel(int width,int height,Main_Client m) {
 		
@@ -288,20 +289,20 @@ public class WaitingPanel extends JPanel{
 		
 		try {
 			dos.writeUTF("WAITING:CHAT:SERVER:"+me.getID()+"님께서 입장하셨습니다.");
-			dos.writeUTF("WAITING:ONLINE");//온라인됫다고 보내야함
-			System.out.println("온라인달라고 보냈다.");
+//			dos.writeUTF("WAITING:ONLINE");//온라인됫다고 보내야함
+//			System.out.println("온라인달라고 보냈다.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		try {
-			dos.writeUTF("WAITING:ROOMS");
-			dos.flush();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		try {
+//			dos.writeUTF("WAITING:ROOMS");
+//			dos.flush();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 	}
 	
 	

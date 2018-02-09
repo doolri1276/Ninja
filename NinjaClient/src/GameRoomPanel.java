@@ -146,6 +146,7 @@ public class GameRoomPanel extends JPanel{
 		System.out.println("상대의 오포낸트를 나로 지정");
 	}
 	
+	
 	public void setGameStart(boolean b) {
 		
 		
@@ -899,53 +900,7 @@ public class GameRoomPanel extends JPanel{
 		btn_waiting.setLocation(50, 50);
 	
 		//korea.add(btn_waiting);
-		btn_waiting.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-			
-				
-				try {
-					if(gameRunning) {
-						dos.writeUTF("GAME:EXIT");
-						dos.flush();
-						gameRunning=false;
-					}
-					dos.writeUTF(me.getCurrentLocation()+":EXIT");
-					dos.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				//내가 있는 장소를 waiting으로 변경, 이걸 서버도 알아야 함.
-				//더불어 패널 변경.
-				me.setCurrentLocation("WAITING");
-				myTurn=false;
-				attackable=false;
-				movable=false;
-				
-				attackClicking=false;
-				moveClicking=false;
-				itemDropTime=false;
-				isAlive=false;
-				startImgshow=false;
-				roomspickable=false;
-				
-				isRunning=false;
-				opTimerRunning=false;
-				myTimerRunning=false;
-				main_Client.changePanel();
-				try {
-					dos.writeUTF("WAITING:ONLINE");
-					dos.writeUTF("WAITING:ROOMS");
-					dos.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		});
+		
 		btns.add(btn_waiting);
 		spp.add(btns,BorderLayout.SOUTH);
 		
@@ -974,6 +929,54 @@ public class GameRoomPanel extends JPanel{
 			}
 			@Override
 			public void keyPressed(KeyEvent arg0) {}
+		});
+		
+btn_waiting.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			
+				System.out.println("나가기 버튼을 눌렀다.");
+				if(gameRunning)return;
+				System.out.println("게임이 실행중이지 않다.");
+				//내가 있는 장소를 waiting으로 변경, 이걸 서버도 알아야 함.
+				//더불어 패널 변경.
+				try {
+					System.out.println("나가기 전의 나의 위치 "+me.getCurrentLocation());
+					dos.writeUTF(me.getCurrentLocation()+":EXIT");
+					dos.flush();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				System.out.println("try문 이후");
+				me.setCurrentLocation("WAITING");
+				myTurn=false;
+				attackable=false;
+				movable=false;
+				
+				attackClicking=false;
+				moveClicking=false;
+				itemDropTime=false;
+				isAlive=false;
+				startImgshow=false;
+				roomspickable=false;
+				
+				isRunning=false;
+				opTimerRunning=false;
+				myTimerRunning=false;
+				
+				main_Client.changePanel();
+//				try {
+//					dos.writeUTF("WAITING:ONLINE");
+//					dos.writeUTF("WAITING:ROOMS");
+//					dos.flush();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				
+			}
 		});
 		
 		drawingThread=new DrawingThread();
