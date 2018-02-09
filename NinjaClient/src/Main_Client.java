@@ -147,7 +147,9 @@ public class Main_Client extends JFrame {
 				mY=e.getY()-30;
 				
 				if(gameRoomPanel==null)return;
+				
 				if(gameRoomPanel.myTurn) {
+					if(!gameRoomPanel.gameRunning) return;
 					System.out.println("마이턴ok라 눌림");
 					
 					if(gameRoomPanel.roomspickable) {
@@ -521,6 +523,8 @@ public class Main_Client extends JFrame {
 			}else if(msg[1].equals("OVER")) {
 				
 				gameRoomPanel.gameOvered(msg[2]);
+			}else if(msg[1].equals("EXIT")) {
+				
 			}
 		}
 		
@@ -596,13 +600,13 @@ public class Main_Client extends JFrame {
 					}
 				}
 			}else if(msg[1].equals("ROOM1")) {
-				caseRoom1();
+				caseRoom1234(0);
 			}else if(msg[1].equals("ROOM2")) {
-				caseRoom2();
+				caseRoom1234(1);
 			}else if(msg[1].equals("ROOM3")) {
-				caseRoom3();
+				caseRoom1234(2);
 			}else if(msg[1].equals("ROOM4")) {
-				caseRoom4();
+				caseRoom1234(3);
 			}
 			
 			
@@ -668,8 +672,7 @@ public class Main_Client extends JFrame {
 			}
 		}
 		
-		public void caseRoom1() {
-			int num=0;
+		public void caseRoom1234(int num) {
 			if(msg[2].equals("CREATED")) {
 				System.out.println("created들어왔다.");
 				waitingPanel.setState(num, msg[4]);
@@ -691,65 +694,65 @@ public class Main_Client extends JFrame {
 			}
 		}
 		
-		public void caseRoom2() {
-			int num=1;
-			if(msg[2].equals("CREATED")) {
-				System.out.println("created들어왔다.");
-				waitingPanel.setState(num, msg[4]);
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-				waitingPanel.repaint();
-			}else if(msg[2].equals("REMOVED")) {
-				waitingPanel.setState(num, "빈   방");
-				waitingPanel.setPlayer1(num, "---");
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-			}else if(msg[2].equals("CHANGED")) {
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-			}
-		}
-		
-		public void caseRoom3() {
-			int num=2;
-			if(msg[2].equals("CREATED")) {
-				System.out.println("created들어왔다.");
-				waitingPanel.setState(num, msg[4]);
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-				waitingPanel.repaint();
-			}else if(msg[2].equals("REMOVED")) {
-				waitingPanel.setState(num, "빈   방");
-				waitingPanel.setPlayer1(num, "---");
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-			}else if(msg[2].equals("CHANGED")) {
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-			}
-		}
-		
-		public void caseRoom4() {
-			int num=3;
-			if(msg[2].equals("CREATED")) {
-				System.out.println("created들어왔다.");
-				waitingPanel.setState(num, msg[4]);
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setRoomb(num, "[대기] 방 입장 하기");
-				waitingPanel.repaint();
-			}else if(msg[2].equals("REMOVED")) {
-				waitingPanel.setState(num, "빈   방");
-				waitingPanel.setPlayer1(num, "---");
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-			}else if(msg[2].equals("CHANGED")) {
-				waitingPanel.setPlayer1(num, msg[3]);
-				waitingPanel.setPlayer2(num, "---");
-				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-			}
-		}
+//		public void caseRoom2() {
+//			int num=1;
+//			if(msg[2].equals("CREATED")) {
+//				System.out.println("created들어왔다.");
+//				waitingPanel.setState(num, msg[4]);
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+//				waitingPanel.repaint();
+//			}else if(msg[2].equals("REMOVED")) {
+//				waitingPanel.setState(num, "빈   방");
+//				waitingPanel.setPlayer1(num, "---");
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
+//			}else if(msg[2].equals("CHANGED")) {
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+//			}
+//		}
+//		
+//		public void caseRoom3() {
+//			int num=2;
+//			if(msg[2].equals("CREATED")) {
+//				System.out.println("created들어왔다.");
+//				waitingPanel.setState(num, msg[4]);
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+//				waitingPanel.repaint();
+//			}else if(msg[2].equals("REMOVED")) {
+//				waitingPanel.setState(num, "빈   방");
+//				waitingPanel.setPlayer1(num, "---");
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
+//			}else if(msg[2].equals("CHANGED")) {
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+//			}
+//		}
+//		
+//		public void caseRoom4() {
+//			int num=3;
+//			if(msg[2].equals("CREATED")) {
+//				System.out.println("created들어왔다.");
+//				waitingPanel.setState(num, msg[4]);
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setRoomb(num, "[대기] 방 입장 하기");
+//				waitingPanel.repaint();
+//			}else if(msg[2].equals("REMOVED")) {
+//				waitingPanel.setState(num, "빈   방");
+//				waitingPanel.setPlayer1(num, "---");
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
+//			}else if(msg[2].equals("CHANGED")) {
+//				waitingPanel.setPlayer1(num, msg[3]);
+//				waitingPanel.setPlayer2(num, "---");
+//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
+//			}
+//		}
 		
 		
 		

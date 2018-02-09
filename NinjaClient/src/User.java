@@ -68,6 +68,9 @@ public class User {
 	public Socket getMySocket() {return mySocket;}
 	public DataOutputStream getDos() {return dos;}
 	public boolean getIsReady(){	return isReady;	}
+	public Room getRoom() {
+		return room;
+	}
 	
 	
 	public void setUserCode(String userCode) {this.id=userCode;}
@@ -112,7 +115,9 @@ public class User {
 		this.dos = dos;
 	}
 	public void setIsReady(boolean isReady) {this.isReady=isReady;}
-	
+	public void setRoom(Room room) {
+		this.room = room;
+	}
 	
 	
 	

@@ -295,7 +295,13 @@ public class WaitingPanel extends JPanel{
 			e.printStackTrace();
 		}
 		
-		
+		try {
+			dos.writeUTF("WAITING:ROOMS");
+			dos.flush();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 	

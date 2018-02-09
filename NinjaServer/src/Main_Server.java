@@ -364,16 +364,19 @@ public class Main_Server extends JFrame {
 						//serverAappend(mySocket.getInetAddress()+" ");
 
 						//serverAappend(ipAddress+"  "+str+"을 전송받았습니다.");
-						serverAappend("배열로 나눠봤습니다 : "+Arrays.toString(msg));
+						serverAappend("["+ipAddress+"_RECEIVE] 배열 : "+Arrays.toString(msg));
 						
 						
 						if(msg[0].equals("LOGIN")) caseLogin();
 						else if(msg[0].equals("GAME")) caseGame();
 						else if(msg[0].equals("SIGNIN")) caseSignin();
 						else if(msg[0].equals("WAITING")) caseWaiting();
-						else if(msg[0].equals("ROOM0")) caseRoom0();
 						else if(msg[0].equals("ROOM1")) caseRoom1();
-						else if(msg[0].equals("ROOM2")) caseRoom2();
+						else if(msg[0].startsWith("ROOM")) {
+
+							int num =Integer.parseInt(msg[0].charAt(4)+"");
+							//caseRoom1234(num);
+						}
 						else if(msg[0].equals("ROOM3")) caseRoom3();
 						else if(msg[0].equals("ROOM4")) caseRoom4();
 						else if(msg[0].equals("EXIT")) {
@@ -462,6 +465,8 @@ public class Main_Server extends JFrame {
 				}else if(msg[1].equals("OVER")){
 					room.isPlaying=false;
 					try {
+						me.setIsReady(false);
+						me.getOpponent().setIsReady(false);
 						me.wonTimesPlus();
 						me.getOpponent().lostTimesPlus();
 						dos.writeUTF("GAME:OVER:WIN");
@@ -469,6 +474,16 @@ public class Main_Server extends JFrame {
 					}catch(Exception e) {
 						e.printStackTrace();
 					}
+				}else if(msg[1].equals("EXIT")) {
+						sendOpoMsg("GAME:EXIT");
+						me.lostTimesPlus();
+						me.getOpponent().wonTimesPlus();
+						
+						me.getOpponent().wonTimesPlus();
+						me.lostTimesPlus();
+						me.getOpponent().setOpponent(null);
+						me.setOpponent(null);
+
 				}
 			}
 			
@@ -477,10 +492,11 @@ public class Main_Server extends JFrame {
 					
 					
 					me.isReady=true;
-					roomAppend(me.currentLocation, "[SERVER] "+me.getID()+"레디함");
+					roomAppend(me.currentLocation, "[SERVER] "+me.getID()+" READY");
 					sendOpoMsg("GAME:READY:TRUE:"+me.id);
-					
-					if(room.setReady()) {
+					if(me.getOpponent()==null) {
+						
+					}else if(room.setReady()) {
 						roomAppend(me.currentLocation, "[GAME] == 게임 시작 ==");
 						try {
 							
@@ -638,6 +654,20 @@ public class Main_Server extends JFrame {
 					
 					//serverAappend(gameManager.checkRoomState());
 					//System.out.println("game manager serverA에 쌓음");
+				}else if(msg[1].equals("ROOMS")) {
+					try {
+						for(int i=0;i<gameManager.getRoomList().size();i++) {
+							Room r=gameManager.getRoomList().get(i);
+							if(r.playerList.size()==2) {
+								dos.writeUTF("ROOM"+r.roomNum+":FULL:"+r.playerList.get(0)+":"+r.playerList.get(1));
+								dos.flush();
+							}else if(r.playerList.size()==1) {
+								dos.writeUTF("ROOM"+r.roomNum+":FULL:"+r.playerList.get(0));
+							}
+						}
+					}catch(Exception e) {
+						
+					}
 				}
 					
 				
@@ -645,50 +675,20 @@ public class Main_Server extends JFrame {
 				
 			}
 			
-			public void caseRoom0() {
-//				if(gameManager.createCheck()) {
-//					String title=msg[3];
-//					
-//					String num=gameManager.createRoom(me,title,dos);
-//					
-//					try {
-//						me.setCurrentLocation("ROOM"+num);
-//						
-//						dos.writeUTF("ROOM0:ROOM"+num+":"+title);//만드는데 성공했고 그 번호는 num번이란다.
-//						String roomNum="ROOM"+num;
-//						roomAppend(roomNum,me.id+"님께서 "+num+"번방 개설");
-//						dos.writeUTF("ROOM:CHAT:SERVER:"+me.id+"님께서 입장하셨습니다.");
-//						dos.writeUTF("ROOM:CHAT:SERVER:다음 사람이 입장할때 까지 대기합니다.");
-//						sendChatMsg("WAITING:ROOM:CREATED:"+me.id+":"+title,"WAITING");
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}else {
-//					try {
-//						dos.writeUTF("ROOM0:FAIL");//만드는데 실패했다. 이미 4개의 방이 꽉차있어.
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-				
-				
-				
-			}
+
 			
 			public void caseRoom1() {
 				String command=msg[1];//CHAT
 				
 				if(msg[1].equals("CHAT")) {
-					room1Aappend("[CHAT_"+me.id+"] " +msg[3]);
+					roomAppend(me.getCurrentLocation(),"[CHAT_"+me.id+"] " +msg[3]);
 					
 					
 					sendChatMsg("ROOM:"+command+":"+me.id+":"+msg[3]);
-					room1Aappend("[CHAT_"+me.id+"] " +msg[3]+"위치:"+me.getCurrentLocation());
-					msg[0]="WAITING";
-					//sendChatMsg(gameManager.checkRoomState());
+					roomAppend(me.getCurrentLocation(),"[CHAT_"+me.id+"] " +msg[3]+"위치:"+me.getCurrentLocation());
+					//msg[0]="WAITING";
 				}else if(msg[1].equals("CREATE")) {
+					
 					if(gameManager.createCheck(1)) {
 						String title=msg[3];
 						
@@ -700,7 +700,7 @@ public class Main_Server extends JFrame {
 							dos.writeUTF("ROOM0:ROOM"+num+":"+title);//만드는데 성공했고 그 번호는 num번이란다.
 							dos.flush();
 							String roomNum="ROOM"+num;
-							roomAppend(roomNum,"[SERVER_CREATE] "+me.id+"님께서 "+num+"번방 개설");
+							roomAppend(roomNum,"["+roomNum+"_CREATE] "+me.id+"님께서 "+num+"번방 개설");
 							dos.writeUTF("ROOM:CHAT:SERVER:"+me.id+"님께서 입장하셨습니다.");
 							dos.flush();
 							dos.writeUTF("ROOM:CHAT:SERVER:다음 사람이 입장할때 까지 대기합니다.");
@@ -747,10 +747,7 @@ public class Main_Server extends JFrame {
 						e.printStackTrace();
 					}
 				}else if(msg[1].equals("EXIT")) {
-					if(room.isPlaying) {
-						me.lostTimesPlus();
-						me.getOpponent().wonTimesPlus();
-					}
+					
 					String changed=gameManager.exitRoom(me,me.currentLocation);
 					
 					sendChatMsg(changed,"WAITING");
@@ -942,7 +939,7 @@ public class Main_Server extends JFrame {
 					if(user.getMe().getCurrentLocation().equals(msg[0])) {
 						//serverAappend("보내려구 합니다.");
 						sendMsg(message, user.getMe().getMySocket());
-						serverAappend("호롤로"+user.getMe().getID()+"에 "+message+"를 보냈습니다.");
+						serverAappend("["+me.getID()+"_SEND] "+user.getMe().getID()+" 전송 ["+message+"]");
 					}
 					
 				}
