@@ -38,7 +38,9 @@ import itempack.PassiveItem;
 public class GameRoomPanel extends JPanel{
 	private String roomNum;
 	private String roomTitle;
+	
 	private ArrayList<User> playerList;
+	
 	private User me; User opponent;
 	
 	
@@ -188,14 +190,11 @@ public class GameRoomPanel extends JPanel{
 							myRoomY=pickedRoom.getYpos();
 							dos.writeUTF("GAME:FIRSTPICK:"+myRoomX+":"+myRoomY);
 							dos.flush();
-							
 							return;
 						}//눌렸는지 체크
+						number=num[i/2];//그림 바꾸고
 						
-						number=num[i/2];
-						//그림 바꾸고
-						Thread.sleep(500);
-						//한번 잠들고
+						Thread.sleep(500);//한번 잠들고
 					}
 					
 					disPickableAll();
@@ -214,7 +213,6 @@ public class GameRoomPanel extends JPanel{
 				}
 			}
 		}.start();
-		
 		
 	}
 	
@@ -331,7 +329,7 @@ public class GameRoomPanel extends JPanel{
 	
 	public void putItem(int xi,int yi,int type) {
 		itemDropTime=true;
-		Item item=new Item();
+		Item item=new APowerUp();
 		switch(type) {
 		case 0:item=new APowerUp();break;
 		case 1:item=new AHold();break;
@@ -398,27 +396,17 @@ public class GameRoomPanel extends JPanel{
 	}
 	
 	public void doMyAction(){
-		
 
 		System.out.println("내 액션 수행");
 		
 		itemCheck();
-		
 		
 		myTimerRunning=true;
 		roomspickable=false;
 		System.out.println("시간 시작된다.");
 		TimerThread t=new TimerThread();
 		t.start();
-				
-		
-		
-		
-		
-		
-		
-		
-		
+
 	}
 	
 	
@@ -534,6 +522,12 @@ public class GameRoomPanel extends JPanel{
 					Thread.sleep(500);
 				}
 				
+				if(attackClicking) {
+					skippedAttacking();
+				}else {
+					skippedMoving();
+				}
+				
 				//안눌렸으면.. 할 일.
 				
 			}catch(Exception e) {
@@ -582,6 +576,12 @@ public class GameRoomPanel extends JPanel{
 	
 	public void skippedMoving() {
 		try {
+			
+			movable=false;
+			moveClicking=false;
+			moved=true;
+			disPickableAll();
+			roomspickable=false;
 			myTimerRunning=false;
 			
 			if(attacked) {
@@ -605,9 +605,12 @@ public class GameRoomPanel extends JPanel{
 	
 	public void skippedAttacking() {
 		try {
+			attackable=false;
+			attackClicking=false;
+			attacked=true;
+			disPickableAll();
 			myTimerRunning=false;
 			roomspickable=false;
-			attackClicking=false;
 			if(moved) {
 				myTurn=false;
 				moved=false;
@@ -817,6 +820,7 @@ public class GameRoomPanel extends JPanel{
 		roomChat.setBackground(Color.black);
 		roomChat.setForeground(Color.white);
 		
+		
 		JPanel p=new JPanel();
 		p.setLayout(new BorderLayout());
 		p.add(pane,BorderLayout.CENTER);
@@ -1008,12 +1012,8 @@ btn_waiting.addActionListener(new ActionListener() {
 		//배경이미지를 그린다.
 		g.drawImage(imgBackground, 0, 0, this);
 		
-		
-		
 		g.setColor(Color.WHITE);
 		g.fillRect(109, 130, 356, 356);
-		
-		
 		
 		for(int i=0;i<5;i++) {
 			for(int j=0;j<5;j++) {
@@ -1046,15 +1046,8 @@ btn_waiting.addActionListener(new ActionListener() {
 						}
 					}
 					
-					
-					
-					
-					
 				}
-				
-				//System.out.println("room"+i+" "+j+" : " +(doorX-32)+","+(doorY-32)+"에 그림");
-				
-				//System.out.println(room.pickable);
+
 				if(room.pickable) {
 					g.setColor(Color.CYAN);
 					g.fillRect(room.getX()-1, room.getY(), 66, 4);

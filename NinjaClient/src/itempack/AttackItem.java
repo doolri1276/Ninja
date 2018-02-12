@@ -1,11 +1,11 @@
 package itempack;
 
-public class AttackItem extends Item {
+public abstract class AttackItem implements Item {
 
 	int type;
 	@Override
 	public void activate() {
-		super.activate();
+		
 
 	}
 

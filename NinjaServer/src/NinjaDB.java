@@ -52,7 +52,6 @@ public class NinjaDB {
 					user.setCurrentLocation("nowhere");
 					
 					userList.add(user);
-					
 							
 				}
 				br.close();

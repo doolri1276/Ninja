@@ -215,17 +215,7 @@ public class WaitingPanel extends JPanel{
 		myInfoPanel.add(i_rank);
 		empty=new JLabel("   ");
 		myInfoPanel.add(empty);
-		
-//		myInfoPanel.add(i_id);
-//		myInfoPanel.add(i_line);
-//		myInfoPanel.add(i_pt);
-//		myInfoPanel.add(i_won);
-//		myInfoPanel.add(i_lost);
-//		myInfoPanel.add(i_rate);
-//		myInfoPanel.add(i_rank);
-		
-		
-		
+			
 		
 		
 		
@@ -345,23 +335,14 @@ public class WaitingPanel extends JPanel{
 				j.setVisible(true);
 				
 				make.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						
-						btnClicked();
-						
-					}
+					public void actionPerformed(ActionEvent e) {btnClicked();}
 				});
 				
 				roomtitle.addKeyListener(new KeyListener() {
-					
-					public void keyTyped(KeyEvent arg0) {	}
+					public void keyTyped(KeyEvent arg0) {}
 					public void keyReleased(KeyEvent e) {if(e.getKeyCode()==KeyEvent.VK_ENTER)btnClicked();	}
 					public void keyPressed(KeyEvent arg0) {}
 				});
-				
-				
 				
 			}else if(((JButton)e.getSource()).getText().startsWith("[대기]")) {
 				try {
@@ -480,46 +461,6 @@ public class WaitingPanel extends JPanel{
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-//	void changeRoom1(String title) {
-//		main_Client.removeAll();
-//		
-//		groom1=new GameRoomPanel();
-//		
-//		main_Client.add(groom1,BorderLayout.CENTER);
-//	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-//	public static void main(String[] args) {
-//		JFrame frame=new JFrame();
-//		frame.setTitle("TEST");
-//		frame.setSize(600, 800);
-//		frame.setLocation(300, 100);
-//		frame.add(new WaitingPanel(584, 762,null));
-//		
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setVisible(true);
-//		//frame.pack();
-//	}
 	
 	
 	

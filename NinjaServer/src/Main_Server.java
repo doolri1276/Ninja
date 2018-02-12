@@ -43,7 +43,9 @@ public class Main_Server extends JFrame {
 
 	
 	private ArrayList<User> userList;
-	private ArrayList<UserThread> onlineUserList;//온라인인 아이들 여기에 존재하지..
+	
+	private ArrayList<UserThread> onlineUserList;
+	//현재 온라인인 멤버들 리스트
 	
 	private JTextArea serverA, room1A,room2A,room3A,room4A;
 	private GameManager gameManager;
@@ -105,11 +107,11 @@ public class Main_Server extends JFrame {
 		DBManager=new NinjaDB();
 		
 		DBManager.fileCreate();
-		//System.out.println("파일을 만들었다.");
+		
 		DBManager.fileRead();
-		//System.out.println("파일을 읽었다.");
 		
 		roomList=new ArrayList<>();
+		
 		gameManager=new GameManager(roomList);
 
 		setTitle("Ninja Game");
@@ -246,11 +248,6 @@ public class Main_Server extends JFrame {
 			add(p2);
 			add(p3);
 			
-			//serverA.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			//room1A.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			//room2A.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			//room3A.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			//room4A.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		}
 		
 		
@@ -270,11 +267,9 @@ public class Main_Server extends JFrame {
 				while(true) {
 					serverAappend("[SERVER_INFO] 현재 인원 : "+onlineUserList.size());
 					Socket socket=mainServer.accept();
-					InetAddress ia=socket.getInetAddress();
 					serverAappend("[SERVER_ENTER] "+(onlineUserList.size()+1)+" 번째 손님 입장 하셨습니다.");
-					//serverA.append("["+(socketList.size()+1)+"] address : "+ia.getHostAddress()+"\n");
 
-					UserThread ut=new UserThread(socket);//여기 손질해야한다.
+					UserThread ut=new UserThread(socket);
 					ut.start();
 					onlineUserList.add(ut);
 					
@@ -350,62 +345,25 @@ public class Main_Server extends JFrame {
 			public void run() {
 				isRun=true;
 				serverAappend("["+ipAddress+"] 객체 생성완료");
-				byte[] buff=new byte[100];
+				
 				while(isRun) {
 					try {
-						//serverAappend(ipAddress+"받기를 기다리는 중입니다.");
 						
 						String str=dis.readUTF();
-						
-
-						
+					
 						msg=str.split(":");
-						
-						//serverAappend(mySocket.getInetAddress()+" ");
-
-						//serverAappend(ipAddress+"  "+str+"을 전송받았습니다.");
+					
 						serverAappend("["+ipAddress+"_RECEIVE] 배열 : "+Arrays.toString(msg));
-						
 						
 						if(msg[0].equals("LOGIN")) caseLogin();
 						else if(msg[0].equals("GAME")) caseGame();
 						else if(msg[0].equals("SIGNIN")) caseSignin();
 						else if(msg[0].equals("WAITING")) caseWaiting();
 						else if(msg[0].startsWith("ROOM")) {
-
 							int num =Integer.parseInt(msg[0].charAt(4)+"");
 							caseRoom1234(num);
 						}
-//						else if(msg[0].equals("ROOM3")) caseRoom3();
-//						else if(msg[0].equals("ROOM4")) caseRoom4();
-						else if(msg[0].equals("EXIT")) {
-							me.setOnlineStatus(false);
-							
-							if(!me.currentLocation.equals("WAITING")) {
-								String nummm=me.currentLocation.charAt(4)+"";
-								String changed=gameManager.exitRoom(me,nummm);
-								sendChatMsg(changed,"WAITING");
-								
-							}
-							
-							sendDeadMsg();
-							me.setCurrentLocation("nowhere");
-							try {
-								dis.close();
-								dos.close();
-								mySocket.close();
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							
-							isRun=false;
-							user_isRun=false;
-							
-							removeUser();
-							
-							
-						}
+						else if(msg[0].equals("EXIT")) caseExit();
 						
 						
 					}catch(Exception e) {
@@ -416,6 +374,34 @@ public class Main_Server extends JFrame {
 				}
 				
 	
+				
+			}
+			
+			public void caseExit() {
+				me.setOnlineStatus(false);
+				
+				if(!me.currentLocation.equals("WAITING")) {
+					String nummm=me.currentLocation.charAt(4)+"";
+					String changed=gameManager.exitRoom(me,nummm);
+					sendChatMsg(changed,"WAITING");
+					
+				}
+				
+				sendDeadMsg();
+				me.setCurrentLocation("nowhere");
+				try {
+					dis.close();
+					dos.close();
+					mySocket.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				isRun=false;
+				user_isRun=false;
+				
+				removeUser();
 				
 			}
 			
@@ -539,13 +525,15 @@ public class Main_Server extends JFrame {
 			
 			synchronized public void caseGameFirstPick(String x,String y) {
 				roomAppend(me.currentLocation, "[GAME] "+me.getID()+"위치 : ["+x+"] ["+y+"]");
+				//서버 화면에 올림
+				
 				me.itemReady=true;
-				me.setXY(x, y);
-				if(me.opponent.getItemReady()) {
+				me.setXY(x, y);//나의 위치 지정
+				if(me.opponent.getItemReady()) {//상대방도 위치를 고른 상태인가?
 					me.itemReady=false;
 					me.getOpponent().setItemReady(false);
-					sendOpoMsg("GAME:FIRSTPICK:"+me.getX()+":"+me.getY());
-					sendMsg("GAME:FIRSTPICK:"+me.getOpponent().getX()+":"+me.getOpponent().getY());
+					sendOpoMsg("GAME:FIRSTPICK:"+me.getX()+":"+me.getY());//내 위치 전송
+					sendMsg("GAME:FIRSTPICK:"+me.getOpponent().getX()+":"+me.getOpponent().getY());//나에게 내 위치 전송  
 					
 				}
 			}
@@ -575,12 +563,7 @@ public class Main_Server extends JFrame {
 						
 						serverAappend("["+me.getID()+"] WAITING으로 LO이동");
 						userList.add(me);
-						//sendChatMsg(gameManager.checkRoomState());
-//						msg[0]="WAITING";
-//						sendChatMsg(gameManager.checkRoomState());
-//						serverAappend(gameManager.checkRoomState());
-//						System.out.println("game manager serverA에 쌓음");
-						
+
 						return;
 						}
 					
@@ -590,9 +573,6 @@ public class Main_Server extends JFrame {
 					sendMsg(returnmsg);
 					return;
 				}
-				
-			
-
 			}
 			
 			public String getRndItem() {
@@ -645,30 +625,25 @@ public class Main_Server extends JFrame {
 					
 					
 				}else if(command.equals("ONLINE")) {
-					//serverAappend("온라인에 들어왔다.");
+
 					String msg=location+":"+"ONLINE";
 					for(int i=0;i<onlineUserList.size();i++) {
 						UserThread ut=onlineUserList.get(i);
 						msg+=":"+ut.getIpAddress();//아이디 목록들 여기에 추가될 예정임.
 						
-						//serverAappend("확인한 곳:"+ut.getIpAddress());
 					}
-					//serverAappend(msg);
+
 					sendChatMsg(msg);
-					//sendChatMsg(gameManager.checkRoomState());
-					
-					
-					//serverAappend(gameManager.checkRoomState());
-					//System.out.println("game manager serverA에 쌓음");
+
 				}else if(msg[1].equals("ROOMS")) {
 					try {
 						for(int i=0;i<gameManager.getRoomList().size();i++) {
 							Room r=gameManager.getRoomList().get(i);
-							if(r.playerList.size()==2) {
-								dos.writeUTF("WAITING:ROOM"+r.roomNum+":FULL:"+r.playerList.get(0).getID()+":"+r.playerList.get(1).getID()+":"+r.getRoomTitle());
+							if(r.getPlayerList().size()==2) {
+								dos.writeUTF("WAITING:ROOM"+r.getPlayerList()+":FULL:"+r.getPlayerList().get(0).getID()+":"+r.getPlayerList().get(1).getID()+":"+r.getRoomTitle());
 								dos.flush();
-							}else if(r.playerList.size()==1) {
-								dos.writeUTF("WAITING:ROOM"+r.roomNum+":CHANGED:"+r.playerList.get(0).getID()+":---:"+r.getRoomTitle());
+							}else if(r.getPlayerList().size()==1) {
+								dos.writeUTF("WAITING:ROOM"+r.getRoomNum()+":CHANGED:"+r.getPlayerList().get(0).getID()+":---:"+r.getRoomTitle());
 							}
 						}
 					}catch(Exception e) {
@@ -691,8 +666,7 @@ public class Main_Server extends JFrame {
 					
 					
 					sendChatMsg("ROOM:"+command+":"+me.id+":"+msg[3]);
-					roomAppend(me.getCurrentLocation(),"[CHAT_"+me.id+"] " +msg[3]+"위치:"+me.getCurrentLocation());
-					//msg[0]="WAITING";
+
 				}else if(msg[1].equals("CREATE")) {
 					caseRoomCreate(roomNumber,msg[3]);
 				}else if(msg[1].equals("ENTER")) {
@@ -706,23 +680,26 @@ public class Main_Server extends JFrame {
 			}
 			
 			synchronized public void caseRoomCreate(int roomNumber,String title){
-				if(gameManager.createCheck(roomNumber)) {
+				if(gameManager.createCheck(roomNumber)) {//방생성이 가능한지 체크
 					
-					
-					gameManager.createRoom(me,title,dos,roomNumber);
+					gameManager.createRoom(me,title,dos,roomNumber);//방 생성
 					
 					try {
-						me.setCurrentLocation("ROOM"+roomNumber);
+						me.setCurrentLocation("ROOM"+roomNumber);//내 위치 변경
 						
-						dos.writeUTF("ROOM0:ROOM"+roomNumber+":"+title);//만드는데 성공했고 그 번호는 num번이란다.
+						dos.writeUTF("ROOM0:ROOM"+roomNumber+":"+title);//방개설 성공 메세지 전송
 						dos.flush();
+						
 						String roomNum="ROOM"+roomNumber;
-						roomAppend(roomNum,"["+roomNum+"_CREATE] "+me.id+"님께서 "+roomNumber+"번방 개설");
+						roomAppend(roomNum,"["+roomNum+"_CREATE] "+me.id+"님께서 "+roomNumber+"번방 개설");//서버메세지
+						
 						dos.writeUTF("ROOM:CHAT:SERVER:"+me.id+"님께서 입장하셨습니다.");
 						dos.flush();
+						
 						dos.writeUTF("ROOM:CHAT:SERVER:다음 사람이 입장할때 까지 대기합니다.");
 						dos.flush();
-						sendChatMsg("WAITING:"+roomNum+":CREATED:"+me.id+":"+title,"WAITING");
+						
+						sendChatMsg("WAITING:"+roomNum+":CREATED:"+me.id+":"+title,"WAITING");//로비에 방개설을 알림
 						room=me.getRoom();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -731,9 +708,9 @@ public class Main_Server extends JFrame {
 					}
 				}else {
 					try {
-						dos.writeUTF("ROOM0:FAIL");//만드는데 실패했다. 이미 4개의 방이 꽉차있어.
+						dos.writeUTF("ROOM0:FAIL");//방 개설 실패.
 						dos.flush();
-						String m=gameManager.getRoomMsg(roomNumber);
+						String m=gameManager.getRoomMsg(roomNumber);//현재 방 상태 전송
 						dos.writeUTF(m);
 						dos.flush();
 					} catch (IOException e) {
@@ -752,17 +729,15 @@ public class Main_Server extends JFrame {
 					dos.flush();
 					
 					roomAppend(m,"[SERVER_ENTER] "+me.id+"님 "+me.room.getRoomNum()+"번방 입장");
-					//System.out.println("입장까지 씀. 635");
-					//me.getOpponent().getDos().writeUTF("ROOM:OPOENTER:"+me.id);//이부분 수정함.
-					//System.out.println("입장한 사실을 알림. 637");
+
 					sendChatMsg(enter,"WAITING");
 					
 					sendOpoMsg("ROOM:OPOENTER:"+me.getID()+":NULL");
-					//System.out.println("main opomsg사용해본다.");
+		
 					sendChatMsg("ROOM:CHAT:SERVER:"+me.id+"님께서 입장하셨습니다.");
 					
 					sendChatMsg("ROOM:CHAT:SERVER:준비 버튼을 눌러주세요.");
-					//sendChatMsg("ROOM:READY:"+me.getID());
+	
 					
 					
 				} catch (IOException e) {
@@ -788,13 +763,10 @@ public class Main_Server extends JFrame {
 				
 				for(int i=0;i<onlineUserList.size();i++) {
 					UserThread user=onlineUserList.get(i);
-					//serverAappend(user.getID()+"쪽을 확인중입니다.");
-					//serverAappend(user.getOnlineStatus()+"  "+user.getCurrentLocation());
+
 					if(!user.getMe().getOnlineStatus()) continue;
-						
-					
+
 					if(user.getMe().getCurrentLocation().equals(msg[0])) {
-						//serverAappend("보내려구 합니다.");
 						sendMsg(message, user.getMe().getMySocket());
 						serverAappend("["+me.getID()+"_SEND] "+user.getMe().getID()+" 전송 ["+message+"]");
 					}
@@ -808,13 +780,12 @@ public class Main_Server extends JFrame {
 				
 				for(int i=0;i<onlineUserList.size();i++) {
 					UserThread user=onlineUserList.get(i);
-					//serverAappend(user.getMe().getID()+"쪽을 확인중입니다.");
-					//serverAappend(user.getMe().getOnlineStatus()+"  "+user.getMe().getCurrentLocation());
+
 					if(!user.getMe().getOnlineStatus()) continue;
 						
 					
 					if(user.getMe().getCurrentLocation().equals(location)) {
-						//serverAappend("보내려구 합니다.");
+
 						sendMsg(message, user.getMe().getMySocket());
 						serverAappend("롤로"+user.getMe().getID()+"에 "+message+"를 보냈습니다.");
 					}
@@ -846,8 +817,6 @@ public class Main_Server extends JFrame {
 				
 				for(int i=0;i<onlineUserList.size();i++) {
 					User user=onlineUserList.get(i).getMe();
-					
-					//if(!user.getOnlineStatus()) continue;
 
 					if(user.getCurrentLocation().equals(msg[0])) {
 						serverAappend(user.getID()+"에 보냄"+str);
@@ -856,13 +825,9 @@ public class Main_Server extends JFrame {
 					}
 					
 				}
-				
-				
-				
-				
+
 			}
 		
-			
 		}
 		
 		
@@ -903,8 +868,6 @@ public class Main_Server extends JFrame {
 						
 						dos.writeUTF(msg);
 						dos.flush();
-						System.out.println("main opo에 메세지 보내졌음 946"+msg);
-						roomAppend(me.getCurrentLocation(), me.getOpponent().getID()+"Opo :"+msg);
 						
 					}catch(Exception e) {}
 				}

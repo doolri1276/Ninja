@@ -10,18 +10,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -44,11 +38,10 @@ public class Main_Client extends JFrame {
 	
 	private MainPanel mainPanel;
 	private LoginPanel loginPanel;
-	private ArrayList<User> userList;
 	private SigninFrame signInFrame;
 	private WaitingPanel waitingPanel;
 	private ReceiveThread receiveThread;
-	private SendThread sendThread;
+
 	
 	private DataInputStream dis;
 	private DataOutputStream dos;
@@ -93,8 +86,6 @@ public class Main_Client extends JFrame {
 		icon_h=64;
 		
 		
-		userList= new ArrayList<>();
-		
 		mainPanel.add(loginPanel);
 		add(mainPanel);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -109,10 +100,10 @@ public class Main_Client extends JFrame {
 		}
 		
 		receiveThread=new ReceiveThread();
-		sendThread=new SendThread();
+
 		
 		receiveThread.start();
-		sendThread.start();
+
 		
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -172,22 +163,12 @@ public class Main_Client extends JFrame {
 						}
 						if(mX>17&&mX<114&&mY>510&&mY<545&&gameRoomPanel.attackClicking) {
 							System.out.println("attack skip 눌렸다!");
-							gameRoomPanel.attackable=false;
-							gameRoomPanel.attackClicking=false;
-							gameRoomPanel.attacked=true;
-							gameRoomPanel.disPickableAll();
-							gameRoomPanel.roomspickable=false;
-							gameRoomPanel.myTimerRunning=false;
+							
 							gameRoomPanel.skippedAttacking();
 							//아무것도 안했다고 보내야함.
 							return;
 						}else if(gameRoomPanel.moveClicking&&mX>129&&mX<226&&mY>510&&mY<545) {//움직였던 경우.
-							gameRoomPanel.movable=false;
-							gameRoomPanel.moveClicking=false;
-							gameRoomPanel.moved=true;
-							gameRoomPanel.disPickableAll();
-							gameRoomPanel.roomspickable=false;
-							gameRoomPanel.myTimerRunning=false;
+
 							gameRoomPanel.skippedMoving();
 							return;
 						}
@@ -220,20 +201,6 @@ public class Main_Client extends JFrame {
 			}
 		});
 		
-//		addMouseMotionListener(new MouseMotionListener() {
-//			
-//			@Override
-//			public void mouseMoved(MouseEvent e) {
-//				System.out.println(e.getX()+"    "+e.getY());
-//				
-//			}
-//			
-//			@Override
-//			public void mouseDragged(MouseEvent arg0) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
 
 	}
 
@@ -360,18 +327,17 @@ public class Main_Client extends JFrame {
 			
 			String msg="LOGIN:CHECK:"+id+":"+psw;
 			System.out.println(msg+"로그인 시도");
-			
-			new Thread() {
-				public void run() {
-					try {
-						dos=new DataOutputStream(mySocket.getOutputStream());
-						dos.writeUTF(msg);
-						dos.flush();
-						
-					}catch(Exception e) {}
-				};
-			}.start();
+
+			try {
+				dos.writeUTF(msg);
+				dos.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+
 		}
+		
 		
 		public JTextField getTf_id() {
 			return tf_id;
@@ -398,6 +364,7 @@ public class Main_Client extends JFrame {
 		public void run() {
 			try {
 				dis=new DataInputStream(mySocket.getInputStream());
+				dos=new DataOutputStream(mySocket.getOutputStream());
 				
 				while(isRun) {
 					System.out.println("전송을 기다립니다.");
@@ -476,6 +443,7 @@ public class Main_Client extends JFrame {
 				gameRoomPanel.setOpoLocation(ox,oy);
 				if(gameRoomPanel.myTurn)
 					gameRoomPanel.doMyTurn();
+				
 			}else if(msg[1].equals("OPTIMER")) {
 				if(msg[2].equals("9")) {
 					gameRoomPanel.opTimerRunning=true;
@@ -664,10 +632,13 @@ public class Main_Client extends JFrame {
 			}else if(msg[1].equals("READY")) {
 				System.out.println("레디레디뽕뽕");
 				if(msg[2].equals("TRUE")) {
+					
 					roomChat.append("[SERVER] "+msg[3]+"님께서 레디하였습니다.\n");
+					roomChat.setCaretPosition(roomChat.getText().length());
 					
 				}else {
 					roomChat.append("[SERVER] "+msg[3]+"님께서 레디 취소하였습니다.\n");
+					roomChat.setCaretPosition(roomChat.getText().length());
 				}
 			}
 		}
@@ -702,85 +673,11 @@ public class Main_Client extends JFrame {
 			}
 		}
 		
-//		public void caseRoom2() {
-//			int num=1;
-//			if(msg[2].equals("CREATED")) {
-//				System.out.println("created들어왔다.");
-//				waitingPanel.setState(num, msg[4]);
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-//				waitingPanel.repaint();
-//			}else if(msg[2].equals("REMOVED")) {
-//				waitingPanel.setState(num, "빈   방");
-//				waitingPanel.setPlayer1(num, "---");
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-//			}else if(msg[2].equals("CHANGED")) {
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-//			}
-//		}
-//		
-//		public void caseRoom3() {
-//			int num=2;
-//			if(msg[2].equals("CREATED")) {
-//				System.out.println("created들어왔다.");
-//				waitingPanel.setState(num, msg[4]);
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-//				waitingPanel.repaint();
-//			}else if(msg[2].equals("REMOVED")) {
-//				waitingPanel.setState(num, "빈   방");
-//				waitingPanel.setPlayer1(num, "---");
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-//			}else if(msg[2].equals("CHANGED")) {
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-//			}
-//		}
-//		
-//		public void caseRoom4() {
-//			int num=3;
-//			if(msg[2].equals("CREATED")) {
-//				System.out.println("created들어왔다.");
-//				waitingPanel.setState(num, msg[4]);
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setRoomb(num, "[대기] 방 입장 하기");
-//				waitingPanel.repaint();
-//			}else if(msg[2].equals("REMOVED")) {
-//				waitingPanel.setState(num, "빈   방");
-//				waitingPanel.setPlayer1(num, "---");
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
-//			}else if(msg[2].equals("CHANGED")) {
-//				waitingPanel.setPlayer1(num, msg[3]);
-//				waitingPanel.setPlayer2(num, "---");
-//				waitingPanel.setRoomb(num, "[대기] 입장 하기");
-//			}
-//		}
-		
 		
 		
 	}//class ReceieveThread............
 	
-	class SendThread extends Thread{
-		//여기부터 하면댐
-		
-		@Override
-		public void run() {
-			//BufferedReader br=new BufferedReader(new InputStreamReader(msg));
-			try {
-				dos=new DataOutputStream(mySocket.getOutputStream());
-				
-	
-			}catch(Exception e) {}
-		}
-		
 
-	}
 	
 	class SigninFrame extends JFrame {
 		

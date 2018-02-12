@@ -28,13 +28,6 @@ public class User {
 	
 	boolean isReady;
 	
-	int hp;
-	boolean movable;
-	boolean attackable;
-	
-	ArrayList<AttackItem> attackItems;
-	ArrayList<PassiveItem> passiveItems;
-	
 	Room room;
 	
 	

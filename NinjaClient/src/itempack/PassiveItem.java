@@ -1,5 +1,11 @@
 package itempack;
 
-public class PassiveItem extends Item{
+public abstract class PassiveItem implements Item{
+
+	@Override
+	public void activate() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

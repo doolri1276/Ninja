@@ -4,19 +4,19 @@ import java.util.Random;
 
 public class Room {
 	
-	String roomTitle;
-	ArrayList<User> playerList;
+	private String roomTitle;
 	
+	private ArrayList<User> playerList;
 	
-	String roomNum;//숫자로 되어있다.1~4로..
-	String state;
+	private String roomNum;//숫자로 되어있다.1~4로..
+	private String state;
 	
-	DataOutputStream dos;
-	GameManager gameManager;
+	private DataOutputStream dos;
+	private GameManager gameManager;
 	
 	boolean isPlaying;
 	
-	Random rnd;
+	private Random rnd;
 	
 	final static int POWERUP=0;
 	final static int HOLD=1;
@@ -120,6 +120,7 @@ public class Room {
 	public ArrayList<User> getPlayerList() {return playerList;}
 	public String getRoomNum() {return roomNum;}
 	public String getState() {return state;	}
+	
 	
 	
 	public void setRoomTitle(String roomTitle) {this.roomTitle = roomTitle;}

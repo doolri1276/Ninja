@@ -1,7 +1,6 @@
 package itempack;
 
-public class Item {
-	
+public interface Item {
 	final static int POWERUP=0;
 	final static int HOLD=1;
 	final static int DOUBLEATTACK=2;
@@ -13,8 +12,5 @@ public class Item {
 	final static int ENERGY=8;
 	final static int SEETHROUGH=9;
 
-	public void activate() {
-		
-	}
-	
+	public void activate();
 }
