@@ -55,12 +55,8 @@ public class User {
 	public boolean getIsReady(){	return isReady;	}
 	public User getOpponent() {	return opponent;}
 	public boolean getItemReady(){return itemReady;}
-	public int getX() {
-		return X;
-	}
-	public int getY() {
-		return Y;
-	}
+	public int getX() {	return X;}
+	public int getY() {	return Y;}
 	
 	
 	public void setUserCode(String userCode) {this.id=userCode;}
@@ -70,75 +66,42 @@ public class User {
 		int playedTimes=Integer.parseInt(timess);
 		this.playedTimes=playedTimes;
 	}
-	
 	public void setWon(String wons) {
 		int won=Integer.parseInt(wons);	
 		this.won = won;
 	}
-	
 	public void setLost(String losts) {
 		int lost=Integer.parseInt(losts);
 		this.lost = lost;
 	}
-	
 	public void setWinRate(String winRates) {
 		double winRate=Double.parseDouble(winRates);
 		this.winRate = winRate;
 	}
-	
 	public void setRanking(String rankings) {
 		int ranking=Integer.parseInt(rankings);
 		this.ranking = ranking;
 	}
-	
 	public void setOnlineStatus(boolean online) {onlineStatus=online;}
-	
 	public void setCurrentLocation(String currentLocation) {this.currentLocation = currentLocation;	}
-	
 	public void setMySocket(Socket mySocket) {	this.mySocket = mySocket;}
-	
-	public void setOpponent(User opponent) {
-		this.opponent = opponent;
-	}
-	
-	public void setRoom(Room room) {
-		this.room = room;
-	}
-	
-	public void setDos(DataOutputStream dos) {
-		this.dos = dos;
-	}
-	public void setIsReady(boolean s) {
-		isReady=s;
-	}
-	public void setWon(int won){
-		this.won=won;
-	}
-	
+	public void setOpponent(User opponent) {	this.opponent = opponent;}
+	public void setRoom(Room room) {	this.room = room;}
+	public void setDos(DataOutputStream dos) {	this.dos = dos;}
+	public void setIsReady(boolean s) {	isReady=s;}
+	public void setWon(int won){	this.won=won;}
 	public void setXY(String x,String y){
 		X=Integer.parseInt(x);
 		Y=Integer.parseInt(y);
 	}
-	public void setItemReady(boolean itemReady) {
-		this.itemReady = itemReady;
-	}
+	public void setItemReady(boolean itemReady) {	this.itemReady = itemReady;}
 	
 	
-	
-	public void playedTimesPlus() {
-		playedTimes++;
-	}
-	
-	public void wonTimesPlus() {
-		won++;
-	}
-	
-	public void lostTimesPlus() {
-		lost++;
-	}
+	public void playedTimesPlus() {	playedTimes++;}
+	public void wonTimesPlus() {	won++;}
+	public void lostTimesPlus() {	lost++;}
 	
 	public String getDBWrite() {
-		
 		return getUserCode()+":"+getID()+":"+getPSW()+":"+getPlayedTimes()+":"+getWon()+":"+getLost()+":"+getWinRate()+":"+getRanking()+":"+"nowhere";
 	}
 	

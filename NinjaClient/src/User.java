@@ -30,8 +30,7 @@ public class User {
 	
 	Room room;
 	
-	
-	//GameRoom room;
+
 	
 	public User() {}
 	

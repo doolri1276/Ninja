@@ -141,19 +141,14 @@ public class Main_Client extends JFrame {
 				
 				if(gameRoomPanel.myTurn) {
 					if(!gameRoomPanel.gameRunning) return;
-					System.out.println("마이턴ok라 눌림");
-					
-					if(gameRoomPanel.roomspickable) {
-						
-						System.out.println("roomspickable이라 눌림");
+					System.out.println("myturn이라 선택가능");
+					if(gameRoomPanel.roomspickable) {//방선택이 가능한 경우
 					
 						for(int i=0;i<5;i++) {
 							for(int j=0;j<5;j++) {
 								Room room=gameRoomPanel.getRooms()[i][j];
 								if(room.pickable&&room.checkLocation(mX, mY)) {
-									//그러면 눌린다. 눌리는 작요ㅇ
-									System.out.println("눌렸다. "+mX+"    "+mY+"   "+room.getXpos()+"  "+room.getYpos());
-									
+									System.out.println("방이 선택됬다! "+room.Xpos+"  "+room.Ypos);
 									gameRoomPanel.disPickableAll();
 									room.isPicked=true;
 									return;
@@ -162,22 +157,20 @@ public class Main_Client extends JFrame {
 							}
 						}
 						if(mX>17&&mX<114&&mY>510&&mY<545&&gameRoomPanel.attackClicking) {
-							System.out.println("attack skip 눌렸다!");
-							
+							System.out.println("skip attack을 눌렀다.");
 							gameRoomPanel.skippedAttacking();
-							//아무것도 안했다고 보내야함.
+ 
 							return;
 						}else if(gameRoomPanel.moveClicking&&mX>129&&mX<226&&mY>510&&mY<545) {//움직였던 경우.
-
+							System.out.println("skipmove를 눌렀다.");
 							gameRoomPanel.skippedMoving();
 							return;
 						}
 						
 					}else if(gameRoomPanel.attackable||gameRoomPanel.movable) {
-						System.out.println("attackable들어왔다.");
+
 						if(gameRoomPanel.attackable&&mX>17&&mX<114&&mY>510&&mY<545) {
-							
-								System.out.println("attack눌렸다!");
+							System.out.println("어택버튼을 눌렀다.");
 								gameRoomPanel.attackClicking=true;
 								gameRoomPanel.movable=false;
 								gameRoomPanel.roomspickable=true;
@@ -185,8 +178,7 @@ public class Main_Client extends JFrame {
 								return;
 						
 						}else if(gameRoomPanel.movable&&mX>129&&mX<226&&mY>510&&mY<545) {
-							System.out.println("movable들어왔다.");
-							System.out.println("move 눌렸다!");
+							System.out.println("move버튼을 눌렀다.");
 							gameRoomPanel.moveClicking=true;
 							gameRoomPanel.attackable=false;
 							gameRoomPanel.roomspickable=true;
@@ -218,8 +210,6 @@ public class Main_Client extends JFrame {
 			if(width==0||height==0) {
 				width=getWidth();
 				height=getHeight();
-				
-				System.out.println("width랑 height구햇습니다."+width+height);
 				
 			}
 			
@@ -316,7 +306,7 @@ public class Main_Client extends JFrame {
 		}
 		
 		public void loginBtnClicked() {
-			System.out.println("버튼이 눌렸다.");
+
 			if(tf_id.getText().length()==0||tf_psw.getText().length()==0) {
 				JOptionPane.showMessageDialog(null, "입력칸이 빈칸입니다.");
 				return;
@@ -326,7 +316,6 @@ public class Main_Client extends JFrame {
 			String psw=tf_psw.getText();
 			
 			String msg="LOGIN:CHECK:"+id+":"+psw;
-			System.out.println(msg+"로그인 시도");
 
 			try {
 				dos.writeUTF(msg);
@@ -367,9 +356,8 @@ public class Main_Client extends JFrame {
 				dos=new DataOutputStream(mySocket.getOutputStream());
 				
 				while(isRun) {
-					System.out.println("전송을 기다립니다.");
+	
 					msg=dis.readUTF().split(":");
-					System.out.println("Client : "+Arrays.toString(msg));
 										
 					if(msg[0].equals("LOGIN")) caseLogin();
 					else if(msg[0].equals("SIGNIN")) caseSignin();
@@ -480,7 +468,6 @@ public class Main_Client extends JFrame {
 					int x=Integer.parseInt(msg[3]);
 					int y=Integer.parseInt(msg[4]);
 					int power=Integer.parseInt(msg[5]);
-					System.out.println("공격받았음 x:"+msg[3]+" y:"+msg[4]+" pwoer:"+power);
 					gameRoomPanel.gotAttacked(x, y, power);
 					if(msg[6].equals("DONE")) {
 						gameRoomPanel.myTurn=true;
@@ -499,7 +486,7 @@ public class Main_Client extends JFrame {
 		synchronized public void caseLogin() {
 			
 			if(msg[1].equals("SUCCESS")) {
-				System.out.println("로그인페이지 SUCCESS확인됨");
+
 				User user=new User();
 				user.setUserCode(msg[2]);
 				user.setID(msg[3]);
@@ -509,18 +496,15 @@ public class Main_Client extends JFrame {
 				user.setWon(msg[6]);
 				user.setLost(msg[7]);
 				
-				user.setWinRate(msg[8]);System.out.println("setWINRATE까지 넣음");
-				user.setRanking(msg[9]);System.out.println("setRANK까지 넣음");
-				System.out.println(user.id+" "+user.psw);
 				me=user;
-				System.out.println("로그인 성공 페이지에 도달");
+
 				JOptionPane.showMessageDialog(null, "로그인에 성공했습니다.");
 				me.setCurrentLocation("WAITING");
-				System.out.println("waiting으로 위치변경까지 했다.");
+
 				changePanel();
-				System.out.println("성공쓰");
+
 			}else if(msg[1].equals("FAIL")) {
-				System.out.println("실패쓰");
+
 				loginPanel.getTf_id().setText("");
 				loginPanel.getTf_psw().setText("");
 				if(msg[2].equals("ONLINE"))JOptionPane.showMessageDialog(null, "해당 아이디는 이미 로그인 된 상태입니다.");
@@ -543,7 +527,7 @@ public class Main_Client extends JFrame {
 		}
 		
 		public void caseWaiting() {
-			System.out.println("메인클라이언트의 쓰레드에서받았다.");
+
 			
 			if(msg[1].equals("CHAT")) caseChat();
 			else if(msg[1].equals("ONLINE")) {
@@ -551,7 +535,7 @@ public class Main_Client extends JFrame {
 				online.setText("   [현재 온라인인 멤버들]\n");
 				online.append( "-----------------------------------\n");
 				for(int i=2;i<msg.length;i++) {
-					System.out.println("메세지 아이이이이이"+msg[i]);
+
 					online.append("  "+msg[i]+"\n");
 				}
 				online.append( "-----------------------------------\n");
@@ -626,11 +610,11 @@ public class Main_Client extends JFrame {
 				gameRoomPanel.setOpponent(msg[4]);
 				
 			}else if(msg[1].equals("OPOENTER")) {
-				System.out.println("opoenter처리 하러 들어왔다. main491");
+
 				gameRoomPanel.setOpponent(msg[2]);
 				
 			}else if(msg[1].equals("READY")) {
-				System.out.println("레디레디뽕뽕");
+			
 				if(msg[2].equals("TRUE")) {
 					
 					roomChat.append("[SERVER] "+msg[3]+"님께서 레디하였습니다.\n");
@@ -645,7 +629,6 @@ public class Main_Client extends JFrame {
 		
 		synchronized public void caseRoom1234(int num) {
 			if(msg[2].equals("CREATED")) {
-				System.out.println("created들어왔다.");
 				waitingPanel.setState(num, msg[4]);
 				waitingPanel.setPlayer1(num, msg[3]);
 				waitingPanel.setRoomb(num, "[대기] 입장 하기");
@@ -655,13 +638,12 @@ public class Main_Client extends JFrame {
 				waitingPanel.setPlayer2(num, "---");
 				waitingPanel.setRoomb(num, "[빈방] 방 개설하기");
 			}else if(msg[2].equals("CHANGED")) {
-				System.out.println("바꾸러 들어왔습니다. ");
+	
 				waitingPanel.setPlayer1(num, msg[3]);
 				waitingPanel.setPlayer2(num, "---");
 				waitingPanel.setRoomb(num, "[대기] 입장 하기");
 				if(msg[5]!=null) {
 					waitingPanel.setState(num, msg[5]);
-					System.out.println("타이틀 변경");
 				}
 			}else if(msg[2].equals("FULL")) {
 				waitingPanel.setPlayer1(num, msg[3]);
@@ -805,18 +787,15 @@ public class Main_Client extends JFrame {
 	void changePanel() {
 		
 		getContentPane().removeAll();
-		System.out.println("지웠다.");
 		
 		waitingPanel=new WaitingPanel(width,height,this);
-		System.out.println(width+"   "+height);
 
 		add(waitingPanel,BorderLayout.CENTER);
 		if(gameRoomPanel!=null)	gameRoomPanel.isRunning=false;
-		
-		System.out.println("waiting panel 추가했어요~");
+
 		revalidate();
 		repaint();
-		System.out.println("다시그렸습니다.");
+
 		try {
 			dos.writeUTF("WAITING:ONLINE");
 			dos.flush();
@@ -841,22 +820,17 @@ public class Main_Client extends JFrame {
 	}
 	
 	void changeRoom(String num,String title) {
-		//waitingPanel.getJ().dispose();
+
 		getContentPane().removeAll();
-		//System.out.println("지웠다.");
-		
-		
+
 		gameRoomPanel=new GameRoomPanel(num,title,me,width,height,dos,this);
-		System.out.println(width+"   "+height);
 
 		
 		add(gameRoomPanel,BorderLayout.CENTER);
 		
-
-		System.out.println("gameRoom panel 추가했어요~");
 		revalidate();
 		repaint();
-		System.out.println("다시그렸습니다.");
+
 		roomChat=gameRoomPanel.getRoomChat();
 		
 		

@@ -71,7 +71,7 @@ public class GameRoomPanel extends JPanel{
 	private Image openedDoor;
 	private Image closedDoor;
 	private Image itemDoor;
-	private int doorX,doorY;
+
 	
 	private Image opImage;
 	private int opX,opY;
@@ -137,15 +137,13 @@ public class GameRoomPanel extends JPanel{
 	
 	
 	public void setOpponent(String id) {
-		System.out.println("id를 받았다."+id+" grp 69라인");
+
 		this.opponent = new User(id);
-		System.out.println("오포낸트 설정을 완료했다. grp71라인");
-		
-		
+
 		me.setOpponent(opponent);
-		System.out.println("내 오포낸트로 지정");
+
 		opponent.setOpponent(me);
-		System.out.println("상대의 오포낸트를 나로 지정");
+
 	}
 	
 	
@@ -299,13 +297,11 @@ public class GameRoomPanel extends JPanel{
 	
 	public void startShow() {
 		startImgshow=true;
-		System.out.println("보이게 변경했다.");
-		
-		
+	
 		try {
-			System.out.println("잠이든다..");
+
 			Thread.sleep(3000);
-			System.out.println("잠이 깼다!");
+
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -366,10 +362,9 @@ public class GameRoomPanel extends JPanel{
 	}
 	
 	public void itemCheck() {
-		System.out.println("아이템 체크하러 들어옴");
+	
 		
 		if(me.room.itemExist) {
-			System.out.println("아이템 있다.");
 			
 			Item i=me.room.getItem();
 			if(i instanceof AttackItem) {
@@ -377,13 +372,13 @@ public class GameRoomPanel extends JPanel{
 				myAttackItems.add((AttackItem)i);
 				me.room.setItem(null);
 				me.room.setItemExist(false);
-				System.out.println("attack하나 먹었다.");
+
 			}else {
 				if(myPassiveItems.size()==3) return;
 				myPassiveItems.add((PassiveItem)i);
 				me.room.setItem(null);
 				me.room.setItemExist(false);
-				System.out.println("passive하나 먹었다.");
+
 			}
 			try {
 				dos.writeUTF("GAME:ITEM:FOUND:"+me.room.getXpos()+":"+me.room.getYpos());
@@ -392,18 +387,18 @@ public class GameRoomPanel extends JPanel{
 				e.printStackTrace();
 			}
 		}
-		System.out.println("지나감.");
+	
 	}
 	
 	public void doMyAction(){
 
-		System.out.println("내 액션 수행");
+
 		
 		itemCheck();
 		
 		myTimerRunning=true;
 		roomspickable=false;
-		System.out.println("시간 시작된다.");
+
 		TimerThread t=new TimerThread();
 		t.start();
 
@@ -511,7 +506,7 @@ public class GameRoomPanel extends JPanel{
 						
 						number=num[i/2];//그림 바꾸고
 						//상대에게 내 시간을 보내주고.
-						System.out.println("그림 바꿨다."+i/2);
+
 						dos.writeUTF("GAME:OPTIMER:"+i/2);
 						dos.flush();
 					}
@@ -549,9 +544,9 @@ public class GameRoomPanel extends JPanel{
 		
 
 		try {
-			System.out.println("잠이든다..");
+
 			Thread.sleep(5000);
-			System.out.println("잠이 깼다!");
+
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -588,6 +583,7 @@ public class GameRoomPanel extends JPanel{
 				myTurn=false;
 				moved=false;
 				attacked=false;
+
 				dos.writeUTF("GAME:MOVE:SKIP:SKIP:DONE");
 				dos.flush();
 				
@@ -632,18 +628,16 @@ public class GameRoomPanel extends JPanel{
 	public void checkMovablePlaces() {
 		int movableArea=1;
 		int x=myRoomX; int y=myRoomY;
-		System.out.println("내 룸위치 : "+myRoomX+"과 "+myRoomY);
+
 		if(x-movableArea>-1) {
 			rooms[y][x-movableArea].pickable=true;
-			//System.out.println("배열로 따지면 위치["+y+"]["+(x-movableArea)+"] 이 배열의 xpos,ypos"+rooms[y][x-movableArea].Xpos+"  "+rooms[y][x-movableArea].Ypos );
+		
 			if(y-movableArea>-1)rooms[y-movableArea][x-movableArea].pickable=true;
 			if(y+movableArea<5)rooms[y+movableArea][x-movableArea].pickable=true;
-			//System.out.println("여기 바뀐거 맞나?"+rooms[y+movableArea][x-movableArea].Xpos+"  "+rooms[y-movableArea][x-movableArea].Ypos+"위치.."+rooms[y-movableArea][x-movableArea].pickable);
 			
 		}
 		if(y-movableArea>-1)rooms[y-movableArea][x].pickable=true;
 		if(y+movableArea<5)rooms[y+movableArea][x].pickable=true;
-		//System.out.println("정아래 pickable? "+rooms[y+movableArea][x-movableArea].pickable);
 		if(x+movableArea<5) {
 			
 			rooms[y][x+movableArea].pickable=true;
@@ -665,7 +659,7 @@ public class GameRoomPanel extends JPanel{
 	
 	
 	public void moveItemDrop(){
-		int wh=32;
+
 		dropX+=dropDX;
 		dropY+=dropDY;
 		if(dropX>width/2) {
@@ -699,7 +693,7 @@ public class GameRoomPanel extends JPanel{
 	
 	
 
-	public GameRoomPanel(String roomNum, String title, User me,int width,int height,DataOutputStream dos,Main_Client main_Client) {
+	public GameRoomPanel(String roomNum, String title, User me,int width,int height,DataOutputStream dos,Main_Client main_Clien) {
 		
 		playerList=new ArrayList<>();
 		playerList.add(me);
@@ -709,8 +703,8 @@ public class GameRoomPanel extends JPanel{
 		this.height=height;
 		this.dos=dos;
 		me.setCurrentLocation(roomNum);
-		this.main_Client=main_Client;
-		doorX=146;doorY=135;
+		this.main_Client=main_Clien;
+
 		
 		myHp=100;
 		opHp=100;
@@ -728,7 +722,6 @@ public class GameRoomPanel extends JPanel{
 			xxx=114;
 			for(int j=0;j<5;j++) {
 				rooms[i][j]=new Room(i,j,xxx,yyy);
-				System.out.println("새로운 방을 넣었다. y="+i+", x="+j);
 				xxx+=70;
 			}
 			yyy+=70;
@@ -940,20 +933,16 @@ btn_waiting.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			
-				System.out.println("나가기 버튼을 눌렀다.");
 				if(gameRunning)return;
-				System.out.println("게임이 실행중이지 않다.");
 				//내가 있는 장소를 waiting으로 변경, 이걸 서버도 알아야 함.
 				//더불어 패널 변경.
 				try {
-					System.out.println("나가기 전의 나의 위치 "+me.getCurrentLocation());
 					dos.writeUTF(me.getCurrentLocation()+":EXIT");
 					dos.flush();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				System.out.println("try문 이후");
 				me.setCurrentLocation("WAITING");
 				myTurn=false;
 				attackable=false;
@@ -971,14 +960,6 @@ btn_waiting.addActionListener(new ActionListener() {
 				myTimerRunning=false;
 				
 				main_Client.changePanel();
-//				try {
-//					dos.writeUTF("WAITING:ONLINE");
-//					dos.writeUTF("WAITING:ROOMS");
-//					dos.flush();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 				
 			}
 		});
@@ -991,7 +972,6 @@ btn_waiting.addActionListener(new ActionListener() {
 	public void roomSent() {
 		if(tf_chat.getText()==null||tf_chat.getText().length()==0)return;
 		
-		//System.out.println(me.getID());
 		String msg=roomNum+":CHAT:"+me.getID()+":"+tf_chat.getText();
 		try {
 			dos.writeUTF(msg);
@@ -1001,7 +981,6 @@ btn_waiting.addActionListener(new ActionListener() {
 			e.printStackTrace();
 		}
 		tf_chat.setText("");
-		System.out.println(msg+"를 서버에 전송했습니다.");
 	}
 	
 	@Override
@@ -1137,7 +1116,6 @@ btn_waiting.addActionListener(new ActionListener() {
 		
 		if(startImgshow) {
 			g.drawImage(startImg, 60, 180,this);
-			System.out.println("스타트 이미지 그렷다!!");
 		}
 		
 		if(opTimerRunning) {
@@ -1176,7 +1154,6 @@ btn_waiting.addActionListener(new ActionListener() {
 					}
 					//할일하고!
 					repaint();
-					//System.out.println("그렸다.");
 					Thread.sleep(20);
 					
 				}catch(Exception e) {

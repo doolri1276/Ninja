@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class NinjaDB {
-	ArrayList<User> userList=new ArrayList<>();
+	private ArrayList<User> userList=new ArrayList<>();
 	
-	File dbFolder=new File("data");
-	File dbFile = new File("data/userDB.txt");
-	
-	//JTextArea ServerA;
-	
+	private File dbFolder=new File("data");
+	private File dbFile = new File("data/userDB.txt");
 	
 	
 	public void fileCreate() {
@@ -107,14 +104,7 @@ public class NinjaDB {
 		userList.add(new User(id,psw));
 		fileWrite(userList);
 		
-		//Calendar cal=Calendar.getInstance();
-		//SimpleDateFormat sdf=new SimpleDateForm a
 		return true;
-		
-	}
-	
-	public void signInUser(String id,String psw) {
-		//userList.add(user);
 		
 	}
 	
@@ -124,6 +114,10 @@ public class NinjaDB {
 		}
 		
 		return null;
+	}
+	
+	public ArrayList<User> getUserList() {
+		return userList;
 	}
 	
 	

@@ -48,10 +48,7 @@ public class WaitingPanel extends JPanel{
 	private JLabel[] player1;
 	private JLabel[] player2;
 	
-	private GameRoomPanel gameRoomPanel;
-	
 	private User me;
-	private Socket mySocket;
 	
 	private DataOutputStream dos;
 	
@@ -82,7 +79,6 @@ public class WaitingPanel extends JPanel{
 		this.height=height;
 		this.main_Client=m;
 		me=main_Client.getMe();
-		mySocket=main_Client.getMySocket();
 		me.setCurrentLocation("WAITING");
 		dos=main_Client.getDos();
 		
@@ -146,8 +142,6 @@ public class WaitingPanel extends JPanel{
 		add(chatPlace,BorderLayout.SOUTH);
 		
 		JPanel myInfoPanel=new JPanel();
-		
-		//BoxLayout b=new BoxLayout(myInfoPanel, arg1)
 		
 		myInfoPanel.setLayout(new BoxLayout(myInfoPanel, BoxLayout.Y_AXIS));
 		myInfoPanel.setPreferredSize(new Dimension(170, 0));
@@ -215,12 +209,7 @@ public class WaitingPanel extends JPanel{
 		myInfoPanel.add(i_rank);
 		empty=new JLabel("   ");
 		myInfoPanel.add(empty);
-			
-		
-		
-		
-//		//setInfo();
-//		
+					
 		add(myInfoPanel,BorderLayout.WEST);
 		
 		JPanel centerPanel=new JPanel();
@@ -279,20 +268,12 @@ public class WaitingPanel extends JPanel{
 		
 		try {
 			dos.writeUTF("WAITING:CHAT:SERVER:"+me.getID()+"님께서 입장하셨습니다.");
-//			dos.writeUTF("WAITING:ONLINE");//온라인됫다고 보내야함
-//			System.out.println("온라인달라고 보냈다.");
+			dos.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
-		
-//		try {
-//			dos.writeUTF("WAITING:ROOMS");
-//			dos.flush();
-//		} catch (IOException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
+
 	}
 	
 	
@@ -414,13 +395,11 @@ public class WaitingPanel extends JPanel{
 			setBorder(BorderFactory.createLineBorder(Color.WHITE));
 			setLayout(new BorderLayout());
 			
-			//btn.setHorizontalAlignment((int)RIGHT_ALIGNMENT);
 			add(btn,BorderLayout.SOUTH);
 			
 			Font f=new Font("한컴 윤고딕 230", Font.PLAIN,20);
 			
 			JPanel p1=new JPanel();
-			//p1.setBackground(Color.LIGHT_GRAY);
 			JLabel tmp=new JLabel("           ");
 			p1.add(tmp);
 			

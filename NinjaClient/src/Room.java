@@ -25,8 +25,6 @@ public class Room {
 		this.y=yy;
 	}
 	
-	
-	
 	public void addItem(Item item) {
 		this.item=item;
 		itemExist=true;
@@ -37,16 +35,9 @@ public class Room {
 	public int getX() {	return x;}
 	public int getY() {	return y;}
 	
-	public void setItemExist(boolean itemExist) {
-		this.itemExist = itemExist;
-	}
-	public void setItem(Item item) {
-		this.item = item;
-	}
-	
-	
-	
-	
+	public void setItemExist(boolean itemExist) {	this.itemExist = itemExist;}
+	public void setItem(Item item) {	this.item = item;}
+
 	
 	
 	public boolean checkLocation(int mX,int mY) {

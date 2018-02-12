@@ -3,8 +3,6 @@ import java.util.ArrayList;
 
 public class GameManager {
 	
-	private ArrayList<User> onlineUserList;
-	
 	private ArrayList<Room> roomList;
 	
 	public GameManager(ArrayList<Room> roomList) {
@@ -25,7 +23,7 @@ public class GameManager {
 	}
 	
 	synchronized public void createRoom(User user,String msg,DataOutputStream dos,int roomNumber) {
-		Room room=new Room(roomNumber+"",user,msg,dos,this);
+		Room room=new Room(roomNumber+"",user,msg);
 		roomList.add(room);
 		return;//roomNum은 ROOM4형태
 		

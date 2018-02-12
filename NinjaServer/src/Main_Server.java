@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -28,22 +27,13 @@ public class Main_Server extends JFrame {
 	//화면 꾸미는 멤버객체들
 	private MainPanel mainPanel;
 	
-	private Image img_icon;
-	private int icon_x,icon_y,icon_w,icon_h;
-	private Image img_bg;
-	
-	//화면 사이즈
-	private int width,height;
-	
 	//DB관련 멤버
 	private NinjaDB DBManager;
-	
 	
 	private ServerSocket mainServer=null;
 
 	
 	private ArrayList<User> userList;
-	
 	private ArrayList<UserThread> onlineUserList;
 	//현재 온라인인 멤버들 리스트
 	
@@ -52,12 +42,7 @@ public class Main_Server extends JFrame {
 	
 	private ArrayList<Room> roomList;
 	
-	
-	
-	
-	
-	
-	
+
 	public void serverAappend(String msg) {
 		serverA.append(msg+"\n");
 		serverA.setCaretPosition(serverA.getText().length());
@@ -117,7 +102,6 @@ public class Main_Server extends JFrame {
 		setTitle("Ninja Game");
 		setSize(800, 600);
 		setLocation(0, 100);
-		//setLayout(null);
 		
 		ImageIcon imgicon=new ImageIcon("images/ninja_red256.png");
 		imgicon=new ImageIcon(imgicon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH));
@@ -135,15 +119,12 @@ public class Main_Server extends JFrame {
 		new MainServerThread().start();
 		
 		
-		
-		
-		
-		
+
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
 				super.windowClosing(arg0);
-				DBManager.fileWrite(DBManager.userList);
+				DBManager.fileWrite(DBManager.getUserList());
 				
 				for(int i=0;i<onlineUserList.size();i++) {
 					
@@ -303,14 +284,14 @@ public class Main_Server extends JFrame {
 	}
 	
 	class UserThread extends Thread{
-		String ipAddress;
-		Socket mySocket;
-		DataInputStream dis;
-		DataOutputStream dos;
-		User me;
-		Room room;
+		private String ipAddress;
+		private Socket mySocket;
+		private DataInputStream dis;
+		private DataOutputStream dos;
+		private User me;
+		private Room room;
 		
-		boolean user_isRun;
+		private boolean user_isRun;
 		
 		public User getMe() {return me;	}
 		public String getIpAddress() {	return ipAddress;}
@@ -338,9 +319,9 @@ public class Main_Server extends JFrame {
 		
 		
 		class ReceiveThread extends Thread{
-			String[] msg;
-			String returnmsg="";
-			boolean isRun;
+			private String[] msg;
+			private String returnmsg="";
+			private boolean isRun;
 			@Override
 			public void run() {
 				isRun=true;
@@ -413,8 +394,8 @@ public class Main_Server extends JFrame {
 				}else if(msg[1].equals("REQUEST")) {
 					if(msg[2].equals("ITEM")) {
 						roomAppend(me.getCurrentLocation(), "[GAME] Item Request");
-						//String item=room.getRndItem();//GAME:ITEM:X위치:Y위치:아이템종류
-						String item=getRndItem();
+
+						String item=getRndItem();//GAME:ITEM:X위치:Y위치:아이템종류
 						roomAppend(me.getCurrentLocation(), "[GAME] "+item);
 						try {
 							dos.writeUTF(item);
@@ -611,8 +592,6 @@ public class Main_Server extends JFrame {
 			public void caseWaiting() {
 				String location=msg[0];
 				String command=msg[1];
-				
-				//serverAappend("wait에 들어옴"+command);
 				
 				if(command.equals("CHAT")) {
 					String id=msg[2];
