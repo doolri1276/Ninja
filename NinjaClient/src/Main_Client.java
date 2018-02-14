@@ -521,7 +521,7 @@ public class Main_Client extends JFrame {
 					
 				}
 			}else if(msg[1].equals("OVER")) {
-				
+				gameRoomPanel.opTimerRunning=false;
 				gameRoomPanel.gameOvered(msg[2]);
 			}else if(msg[1].equals("EXIT")) {
 				
