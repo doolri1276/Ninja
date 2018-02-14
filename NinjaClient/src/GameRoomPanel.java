@@ -128,6 +128,7 @@ public class GameRoomPanel extends JPanel{
 	boolean gameOver;
 	
 	int attackPower;
+	opTimerThread ot;
 	
 	
 	
@@ -285,6 +286,7 @@ public class GameRoomPanel extends JPanel{
 		myTurn=true;
 		moveClicking=false;
 		attackClicking=false;
+		System.out.println("domyTurn을 한다.");
 		
 		requestItem();
 		
@@ -421,6 +423,34 @@ public class GameRoomPanel extends JPanel{
 		
 	}
 	
+	class opTimerThread extends Thread{
+		@Override
+		public void run() {
+			try {
+				opTimerRunning=true;
+				for(int i=99;i>-1;i--) {
+					System.out.println("숫자의 정체 : "+i/10);
+					number=num[i/10];
+					System.out.println("잔다...100");
+					Thread.sleep(100);
+					if(!opTimerRunning) {
+						System.out.println("중단됬다.");
+						opTimerRunning=false;
+						break;
+					}
+						
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void doOpTimer(){
+		System.out.println("optimer하는데에 들어");
+		ot=new opTimerThread();
+		ot.start();
+	}
 	
 	
 	class TimerThread extends Thread{
@@ -430,8 +460,10 @@ public class GameRoomPanel extends JPanel{
 			try {
 				
 			
-				
+				dos.writeUTF("GAME:OPTIMER:10");
+				dos.flush();
 				for(int i=19;i>-1;i--) {
+					
 					
 					pickedRoom=checkPicked();
 					if(pickedRoom!=null) {
@@ -524,8 +556,7 @@ public class GameRoomPanel extends JPanel{
 						number=num[i/2];//그림 바꾸고
 						//상대에게 내 시간을 보내주고.
 						System.out.println("그림 바꿨다."+i/2);
-						dos.writeUTF("GAME:OPTIMER:"+i/2);
-						dos.flush();
+
 					}
 					
 					if(!myTimerRunning) {

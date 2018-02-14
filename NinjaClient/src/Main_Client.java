@@ -431,7 +431,7 @@ public class Main_Client extends JFrame {
 		}
 		
 		
-		public void caseGame() {
+		synchronized public void caseGame() {
 			if(msg[1].equals("READY")) {
 				if(msg[2].equals("TRUE")) {
 					me.opponent.setIsReady(true);
@@ -477,8 +477,8 @@ public class Main_Client extends JFrame {
 				if(gameRoomPanel.myTurn)
 					gameRoomPanel.doMyTurn();
 			}else if(msg[1].equals("OPTIMER")) {
-				if(msg[2].equals("9")) {
-					gameRoomPanel.opTimerRunning=true;
+				if(msg[2].equals("10")) {
+					gameRoomPanel.doOpTimer();
 				}
 				int n=Integer.parseInt(msg[2]);
 				gameRoomPanel.number=gameRoomPanel.num[n];
@@ -487,6 +487,7 @@ public class Main_Client extends JFrame {
 				}
 			}else if(msg[1].equals("MOVE")) {
 				gameRoomPanel.opTimerRunning=false;
+				
 				if(msg[2].equals("SKIP")) {
 					if(msg[4].equals("DONE")) {
 						gameRoomPanel.myTurn=true;
@@ -503,6 +504,7 @@ public class Main_Client extends JFrame {
 				}
 			}else if(msg[1].equals("ATTACK")) {
 				gameRoomPanel.opTimerRunning=false;
+				
 				if(msg[2].equals("SKIP")) {
 					if(msg[4].equals("DONE")) {
 						gameRoomPanel.myTurn=true;
@@ -521,7 +523,7 @@ public class Main_Client extends JFrame {
 					
 				}
 			}else if(msg[1].equals("OVER")) {
-				
+				gameRoomPanel.opTimerRunning=false;
 				gameRoomPanel.gameOvered(msg[2]);
 			}else if(msg[1].equals("EXIT")) {
 				
